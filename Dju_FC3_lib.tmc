@@ -101,7 +101,6 @@ int doSetEngine(int engine, int status)
     Engine_Status[engine] = status;
     updateBacklight();
 }
-
 // Engine start / stop
 // Checks if engine can be started and keeps track of engine status
 int setEngine(int engine, int status, int checkThrottle=0)
