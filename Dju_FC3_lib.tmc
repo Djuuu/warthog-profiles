@@ -25,8 +25,50 @@ char Autopilot_Status;
 char Engine_Status[2];
 char ExtView;
 
+
 // Custom functions **************************************************************
 
+// init function
+int initCustomCommands()
+{
+    // Flag init
+    Autopilot_Status = 0;
+    Engine_Status[Left] = 0;
+    Engine_Status[Right] = 0;
+
+    ExtView = 0;
+
+    // Custom commands init
+    SensorCurveM = LIST(0,32, 45,50, 55,50, 100,68); // Medium sensitivity curve for sensor control
+    SensorCurveL = LIST(0,40, 45,50, 55,50, 100,60); // Low sensitivity curve used when sensor is zoomed in
+    ZoomInCustom = CHAIN(PULSE+Display_Zoom_In,
+                         EXEC("SetCustomCurve(&Throttle, SCX, SensorCurveL);",
+                              "SetCustomCurve(&Throttle, SCY, SensorCurveL);"));
+    ZoomOutCustom = CHAIN(PULSE+Display_Zoom_Out,
+                         EXEC("SetCustomCurve(&Throttle, SCX, SensorCurveM);",
+                              "SetCustomCurve(&Throttle, SCY, SensorCurveM);"));
+
+    AirbrakeOnCustom  = CHAIN( PULSE+Airbrake_On,  D(), LedOn(3));
+    AirbrakeOffCustom = CHAIN( PULSE+Airbrake_Off, D(), LedOff(3));
+
+    FlapsUpCustom      = CHAIN( PULSE+Flaps_Up,               D(), LedOff(4));
+    FlapsDownCustom    = CHAIN( PULSE+Flaps_Up_Down,          D(), LedOn(4));
+    FlapsLandingCustom = CHAIN( PULSE+Flaps_Landing_Position, D(), LedOn(4));
+
+    LandingGearUpCustom   = CHAIN( PULSE+Landing_Gear_Up,   D(), EXEC("BlinkToOff(5);"));
+    LandingGearDownCustom = CHAIN( PULSE+Landing_Gear_Down, D(), EXEC("BlinkToOn(5);"));
+
+    ModeAACustom  = CHAIN( PULSE+_6__Longitudinal_Missile_Aiming_Mode, D(), LedOn(1),  LedOff(2));
+    ModeAGCustom  = CHAIN( PULSE+_7__Air_To_Ground_Mode,               D(), LedOn(1),  LedOn(2));
+    ModeNavCustom = CHAIN( PULSE+_1__Navigation_Modes,                 D(), LedOff(1), LedOff(2));
+
+    // 43, 86, 129, 172, 215
+    BaclightLow  = LED(&Throttle, LED_INTENSITY, 43);
+    BaclightHigh = LED(&Throttle, LED_INTENSITY, 172);
+}
+
+
+// Sets view to external view
 int setExtView(int view)
 {
     ActKey(KEYON+PULSE+view);
@@ -34,6 +76,7 @@ int setExtView(int view)
         ExtView = 1;
     }
 }
+// Resets view to F1 internal view
 int resetView()
 {
     if (ExtView == 1) {
@@ -62,7 +105,6 @@ int setEngine(int engine, int status, int checkThrottle=0)
 
     updateBacklight();
 }
-
 // Afterburner indication
 int setAfterburner(int engine, int on)
 {
@@ -87,7 +129,6 @@ int LedOff(int i)
 {
     return LED(&Throttle, LED_ONOFF, LED_CURRENT-LedArray[i]);
 }
-
 // Turns LED i on with blinking transition (function)
 int BlinkToOn(int i, int duration=3000)
 {
@@ -101,7 +142,6 @@ int BlinkToOn(int i, int duration=3000)
         DeferCall(time, &ActKey, KEYON+PULSE+LedOn(i));
     }
 }
-
 // Turns LED i on with blinking transition (function)
 int BlinkToOff(int i, int duration=3000)
 {
@@ -151,43 +191,4 @@ int autopilotToggle()
 {
     if (Autopilot_Status) autopilotDisengage();
     else                  autopilotEngage();
-}
-
-// init function
-int initCustomCommands()
-{
-    // Flag init
-    Autopilot_Status = 0;
-    Engine_Status[Left] = 0;
-    Engine_Status[Right] = 0;
-
-    ExtView = 0;
-
-    // Custom commands init
-    SensorCurveM = LIST(0,32, 45,50, 55,50, 100,68); // Medium sensitivity curve for sensor control
-    SensorCurveL = LIST(0,40, 45,50, 55,50, 100,60); // Low sensitivity curve used when sensor is zoomed in
-    ZoomInCustom = CHAIN(PULSE+Display_Zoom_In,
-                         EXEC("SetCustomCurve(&Throttle, SCX, SensorCurveL);",
-                              "SetCustomCurve(&Throttle, SCY, SensorCurveL);"));
-    ZoomOutCustom = CHAIN(PULSE+Display_Zoom_Out,
-                         EXEC("SetCustomCurve(&Throttle, SCX, SensorCurveM);",
-                              "SetCustomCurve(&Throttle, SCY, SensorCurveM);"));
-
-    AirbrakeOnCustom  = CHAIN( PULSE+Airbrake_On,  D(), LedOn(3));
-    AirbrakeOffCustom = CHAIN( PULSE+Airbrake_Off, D(), LedOff(3));
-
-    FlapsUpCustom      = CHAIN( PULSE+Flaps_Up,               D(), LedOff(4));
-    FlapsDownCustom    = CHAIN( PULSE+Flaps_Up_Down,          D(), LedOn(4));
-    FlapsLandingCustom = CHAIN( PULSE+Flaps_Landing_Position, D(), LedOn(4));
-
-    LandingGearUpCustom   = CHAIN( PULSE+Landing_Gear_Up,   D(), EXEC("BlinkToOff(5);"));
-    LandingGearDownCustom = CHAIN( PULSE+Landing_Gear_Down, D(), EXEC("BlinkToOn(5);"));
-
-    ModeAACustom  = CHAIN( PULSE+_6__Longitudinal_Missile_Aiming_Mode, D(), LedOn(1),  LedOff(2));
-    ModeAGCustom  = CHAIN( PULSE+_7__Air_To_Ground_Mode,               D(), LedOn(1),  LedOn(2));
-    ModeNavCustom = CHAIN( PULSE+_1__Navigation_Modes,                 D(), LedOff(1), LedOff(2));
-
-    // 43, 86, 129, 172, 215
-    BaclightLow  = LED(&Throttle, LED_INTENSITY, 43);
-    BaclightHigh = LED(&Throttle, LED_INTENSITY, 172);
 }
