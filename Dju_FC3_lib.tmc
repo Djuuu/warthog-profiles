@@ -93,26 +93,28 @@ int resetView()
 }
 
 // Engine start / stop
-int setEngine(int engine, int status, int checkThrottle=0)
+int doSetEngine(int engine, int status)
 {
-    int command = EngineCommand[(engine<<1)|status];
-
-    if (status == Start) {
-        if(!(checkThrottle) | !(Throttle[IdleSwitch[engine]])) {
-            ActKey(KEYON+PULSE+command);
-            if (Engine_Status[engine] == Stop) {
-                Engine_Status[engine] = status;
-            }
-        }
-    }
-    else {
-        ActKey(KEYON+PULSE+command);
-        Engine_Status[engine] = status;
-    }
-
+    // Adds delay to one engine to avoid keyboard shortcut conflict
+    // when both engines are turned on/off simultaneously
+    DeferCall(engine * kb_delay * 2, &ActKey, KEYON+PULSE+EngineCommand[(engine<<1)|status]);
+    Engine_Status[engine] = status;
     updateBacklight();
 }
+
+// Engine start / stop
+// Checks if engine can be started and keeps track of engine status
+int setEngine(int engine, int status, int checkThrottle=0)
+{
+    // If status is Start, checks if the enfine is fueled
+    if (  status == Start
+        & checkThrottle
+        & Throttle[IdleSwitch[engine]]) { return 0;}
+
+    doSetEngine(engine, status);
+}
 // Afterburner indication
+// Checks if engine is started and keeps track of engine status
 int setAfterburner(int engine, int on)
 {
     if (Engine_Status[engine] == Stop) return 0;
