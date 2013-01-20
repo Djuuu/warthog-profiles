@@ -5,7 +5,7 @@ include "Dju_TrackIR_Macros.ttm"
 // Useful arrays **************************************************************
 int LedArray[] = {LED0, LED1, LED2, LED3, LED4, LED5};
 int IdleSwitch[] = {IDLELON, IDLERON};
-int EngineCommand[] = {Engine_Left_Stop, Engine_Left_Start, Engine_Right_Stop, Engine_Right_Start};
+int EngineCommand[4];
 
 // Custom actions **************************************************************
 
@@ -31,6 +31,13 @@ char ExtView;
 // init function
 int initCustomCommands()
 {
+    printf("Dju_FC3_lib.tmc init \xa");
+
+    EngineCommand[0] = Engine_Left_Stop;   // (Left  << 1) | Stop
+    EngineCommand[1] = Engine_Left_Start;  // (Left  << 1) | Start
+    EngineCommand[2] = Engine_Right_Stop;  // (Right << 1) | Stop
+    EngineCommand[3] = Engine_Right_Start; // (Right << 1) | Start
+
     // Flag init
     Autopilot_Status = 0;
     Engine_Status[Left] = 0;
