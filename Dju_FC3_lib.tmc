@@ -19,11 +19,14 @@ int FlapsUpCustom, FlapsDownCustom, FlapsLandingCustom; // With LED indicator
 
 int BaclightLow, BaclightHigh; // Backlight intensity setting
 
+int CounterMeasuresPgm[10]; // Countermeasures program (5 slots available)
+
 // Flags **************************************************************
 
 char Autopilot_Status;
 char Engine_Status[2];
 char ExtView;
+char CurrentCMProgram; // Current countermeasures program
 
 
 // Custom functions **************************************************************
@@ -48,6 +51,26 @@ int initCustomCommands()
     // Custom commands init
     SensorCurveM = LIST(0,32, 45,50, 55,50, 100,68); // Medium sensitivity curve for sensor control
     SensorCurveL = LIST(0,40, 45,50, 55,50, 100,60); // Low sensitivity curve used when sensor is zoomed in
+
+    // Countermeasures
+    CurrentCMProgram = 0;
+
+    _setCountermeasuresProgram(1, CHAIN(
+        PULSE+Countermeasures_Flares_Dispense, D(200),
+        PULSE+Countermeasures_Flares_Dispense, D(200),
+        PULSE+Countermeasures_Flares_Dispense, D(200),
+        PULSE+Countermeasures_Chaff_Dispense, D(200),
+        PULSE+Countermeasures_Chaff_Dispense, D(200),
+        PULSE+Countermeasures_Chaff_Dispense
+    ), 5000);
+
+    _setCountermeasuresProgram(2, CHAIN(
+        PULSE+Countermeasures_Flares_Dispense, D(200),
+        PULSE+Countermeasures_Flares_Dispense, D(200),
+        PULSE+Countermeasures_Chaff_Dispense, D(200),
+        PULSE+Countermeasures_Chaff_Dispense
+    ), 3000);
+
     ZoomInCustom = CHAIN(PULSE+Display_Zoom_In,
                          EXEC("SetCustomCurve(&Throttle, SCX, SensorCurveL);",
                               "SetCustomCurve(&Throttle, SCY, SensorCurveL);"));
@@ -199,4 +222,30 @@ int autopilotToggle()
 {
     if (Autopilot_Status) autopilotDisengage();
     else                  autopilotEngage();
+}
+
+// Toggle countermeasures program
+int countermeasures_program(int pgm)
+{
+    if (pgm > 0) { // not a loop call - toggle program
+        if (CurrentCMProgram > 0) { // program is running
+            CurrentCMProgram = 0; // stop program
+         } else {
+             CurrentCMProgram = pgm; // run program
+        }
+    }
+    if (CurrentCMProgram > 0) {
+         ActKey(KEYON+_getCountermeasuresProgram(CurrentCMProgram));
+        DeferCall(_getCountermeasuresProgramDelay(CurrentCMProgram), &countermeasures_program, -1);
+    }
+}
+int _setCountermeasuresProgram(int num, int program, int delay) {
+    CounterMeasuresPgm[(num-1)<<1] = program;
+    CounterMeasuresPgm[(num-1)<<1|1] = delay;
+}
+int _getCountermeasuresProgram(int num) {
+    return CounterMeasuresPgm[(num-1)<<1];
+}
+int _getCountermeasuresProgramDelay(int num) {
+    return CounterMeasuresPgm[(num-1)<<1|1];
 }

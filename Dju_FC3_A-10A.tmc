@@ -73,10 +73,10 @@ int main()
 
     // Countermeasures Management Switch
     MapKeyIO(&Joystick, H4P, PULSE+ECM, PULSE+TrackIR_center);
-    MapKey(&Joystick, H4U, PULSE+Countermeasures_Continuously_Dispense);
-    MapKey(&Joystick, H4D, PULSE+Countermeasures_Release);
-    MapKey(&Joystick, H4L, PULSE+Countermeasures_Chaff_Dispense);
-    MapKey(&Joystick, H4R, PULSE+Countermeasures_Flares_Dispense);
+    MapKey(&Joystick, H4U, EXEC("countermeasures_program(2);"));
+    MapKey(&Joystick, H4D, CHAIN(EXEC("CurrentCMProgram = 0;"), PULSE+Countermeasures_Release));
+    MapKey(&Joystick, H4L, CHAIN(EXEC("CurrentCMProgram = 0;"), PULSE+Countermeasures_Chaff_Dispense));
+    MapKey(&Joystick, H4R, CHAIN(EXEC("CurrentCMProgram = 0;"), PULSE+Countermeasures_Flares_Dispense));
 
     // Trim Switch
     MapKey(&Joystick, H1U, Trim_Down);
