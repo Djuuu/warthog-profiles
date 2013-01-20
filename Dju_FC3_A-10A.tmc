@@ -55,44 +55,17 @@ int setEngine(int engine, int status, int checkThrottle=0)
     updateBacklight();
 }
 
+// Afterburner indication
 int setAfterburner(int engine, int status)
 {
     if (engine == Engine_Left) {
-        if (Engine_Left_Status == 0) { return;}
-        Engine_Left_Status = (status == 1) ? 2 : 1;
+        if (Engine_Left_Status == 0) return 0;
+        Engine_Left_Status = status + 1;
     } else {
-        if (Engine_Right_Status == 0) { return;}
-        Engine_Right_Status = (status == 1) ? 2 : 1;
+        if (Engine_Right_Status == 0) return 0;
+        Engine_Right_Status = status + 1;
     }
     updateBacklight();
-}
-
-int updateBacklight()
-{
-    if ((Engine_Left_Status == 0) & (Engine_Right_Status == 0)) {
-        ActKey(KEYON+PULSE+LedOff(0)); // OFF
-    }
-    else {
-        ActKey(KEYON+PULSE+LedOn(0)); // ON
-        if ((Engine_Left_Status == 2) & (Engine_Right_Status == 2)) {
-            ActKey(KEYON+PULSE+BaclightHigh); // Afterburner
-        }
-        else {
-            ActKey(KEYON+PULSE+BaclightLow); // standard
-        }
-    }
-}
-
-
-
-// Autopilot function, depending on LASTE switches states
-int autopilotEngage()
-{
-    if(Throttle[APPAT])                          ActKey(KEYON+PULSE+Autopilot_Route_following);             // PATH
-    else if(Throttle[APALT] & Throttle[RDRDIS])  ActKey(KEYON+PULSE+Autopilot_Barometric_Altitude_Hold); // ALT (baro)
-    else if (Throttle[APALT] & Throttle[RDRNRM]) ActKey(KEYON+PULSE+Autopilot_Radar_Altitude_Hold);  // ALT (radar)
-    else                                         ActKey(KEYON+PULSE+Autopilot_Altitude_And_Roll_Hold); // APAH
-    Autopilot_Status = !Autopilot_Status;
 }
 
 // Turns LED i on (command)
@@ -106,6 +79,32 @@ int LedOff(int i)
     return LED(&Throttle, LED_ONOFF, LED_CURRENT-LedArray[i]);
 }
 
+// Engine power indication
+int updateBacklight()
+{
+    if ((Engine_Left_Status == 0) & (Engine_Right_Status == 0)) {
+        ActKey(KEYON+PULSE+LedOff(0)); // OFF
+    }
+    else {
+        ActKey(KEYON+PULSE+LedOn(0)); // ON
+        if ((Engine_Left_Status == 2) | (Engine_Right_Status == 2)) {
+            ActKey(KEYON+PULSE+BaclightHigh); // Afterburner
+        }
+        else {
+            ActKey(KEYON+PULSE+BaclightLow); // standard
+        }
+    }
+}
+
+// Autopilot function, depending on LASTE switches states
+int autopilotEngage()
+{
+    if(Throttle[APPAT])                          ActKey(KEYON+PULSE+Autopilot_Route_following);             // PATH
+    else if(Throttle[APALT] & Throttle[RDRDIS])  ActKey(KEYON+PULSE+Autopilot_Barometric_Altitude_Hold); // ALT (baro)
+    else if (Throttle[APALT] & Throttle[RDRNRM]) ActKey(KEYON+PULSE+Autopilot_Radar_Altitude_Hold);  // ALT (radar)
+    else                                         ActKey(KEYON+PULSE+Autopilot_Altitude_And_Roll_Hold); // APAH
+    Autopilot_Status = !Autopilot_Status;
+}
 
 int initCustomCommands()
 {
@@ -300,10 +299,15 @@ int main()
     MapKeyR(&Throttle, IDLERON, EXEC("setEngine(Right, 1);"));
 
     // Throttle
-    KeyAxis(&Throttle, THR_RIGHT, 0, AXMAP2( LIST( 0, 80, 81 ),
-        LED(&Throttle, LED_INTENSITY, 43), 0,
-        LED(&Throttle, LED_INTENSITY, 172)
+    KeyAxis(&Throttle, THR_LEFT, 0, AXMAP2( LIST( 0, 80, 81 ),
+        EXEC("setAfterburner(Engine_Left, 0);"), 0,
+        EXEC("setAfterburner(Engine_Left, 1);")
     ));
+    KeyAxis(&Throttle, THR_RIGHT, 0, AXMAP2( LIST( 0, 80, 81 ),
+        EXEC("setAfterburner(Engine_Right, 0);"), 0,
+        EXEC("setAfterburner(Engine_Right, 1);")
+    ));
+
 
     // EAC
     //
