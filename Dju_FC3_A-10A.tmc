@@ -41,6 +41,9 @@ int main()
 
     // Joystick **************************************************************
 
+    // Paddle switch
+    MapKeyR(&Joystick, S4, EXEC("resetView();")); // Resets view to F1 if external view toggled with HOTAS
+
     // Gun trigger
     MapKeyUMD(  &Joystick, TG1, Weapon_Fire,
                                 PULSE+Smoke,
@@ -54,7 +57,7 @@ int main()
                                 PULSE+HUD_Color,                  PULSE+HUD_Color,
                                 PULSE+Launch_Permission_Override, PULSE+Cannon);
     // Nosewheel Steering Button
-    MapKey(&Joystick, S3,       PULSE+Trim_Reset);
+    MapKey(&Joystick, S3,       CHAIN(EXEC("autopilotDisengage();"), D(), D(), PULSE+Trim_Reset));
 
     // Target Management Switch
     MapKeyIO(&Joystick, H2U, PULSE+All_Labels, 0);             // ^
@@ -101,17 +104,18 @@ int main()
                               AirbrakeOnCustom);
 
     // Boat Switch
-    ModeAACustom  = CHAIN( PULSE+_6__Longitudinal_Missile_Aiming_Mode, D(), LedOn(1),  D(), LedOff(2));
-    ModeAGCustom  = CHAIN( PULSE+_7__Air_To_Ground_Mode,               D(), LedOn(1),  D(), LedOn(2));
-    ModeNavCustom = CHAIN( PULSE+_1__Navigation_Modes,                 D(), LedOff(1), D(), LedOff(2));
-
     MapKey(&Throttle, BSF, ModeAACustom);
     MapKey(&Throttle, BSB, ModeAGCustom);
     MapKey(&Throttle, BSM, ModeNavCustom);
 
     // China Hat
-    MapKeyIOUMD(&Throttle, CHF, 0, PULSE+USB[7], 0, 0, 0, PULSE+USB[7]);
-    MapKeyIOUMD(&Throttle, CHB, 0, PULSE+USB[7], 0, 0, 0, PULSE+USB[7]);
+    MapKeyIOUMD(&Throttle, CHF, EXEC("setExtView(F8_Target_view);"),         PULSE+Weapon_Change,
+                                EXEC("setExtView(F8_Target_view);"),         0,
+                                EXEC("setExtView(F8_Target_view);"),         PULSE+Weapon_Change);
+
+    MapKeyIOUMD(&Throttle, CHB, EXEC("setExtView(F5_Ground_hostile_view);"), PULSE+Weapon_Change,
+                                EXEC("setExtView(F5_Ground_hostile_view);"), 0,
+                                EXEC("setExtView(F5_Ground_hostile_view);"), PULSE+Weapon_Change);
 
     // Coolie Switch
     MapKeyIOUMD(&Throttle, CSU, 0, 0,   0, 0,   PULSE+Salvo_Mode,   PULSE+PRS_SGL_Release_Submodes_Cycle);
@@ -123,8 +127,7 @@ int main()
     MapKeyIO(&Throttle, SC, PULSE+Target_Unlock, PULSE+Target_Lock);
 
     // Left Throttle Button
-    MapKeyUMD(&Throttle, LTB, PULSE+F8_Target_view, PULSE+F10_Theater_map_view, PULSE+F5_Ground_hostile_view);
-    MapKeyRIO(&Throttle, LTB, 0, PULSE+F1_Cockpit_view);
+    MapKeyIO(&Throttle, LTB, Weapons_Jettison, EXEC("autopilotToggle();"));
 
     // Pinky Switch
     MapKeyIO(&Throttle, PSF, PULSE+Gear_Light_Near_Far_Off, PULSE+Navigation_lights);
@@ -132,10 +135,6 @@ int main()
     MapKeyIO(&Throttle, PSM, PULSE+Gear_Light_Near_Far_Off, 0);
 
     // Flaps
-    FlapsUpCustom      = CHAIN( PULSE+Flaps_Up,               D(), LedOff(4));
-    FlapsDownCustom    = CHAIN( PULSE+Flaps_Up_Down,          D(), LedOn(4));
-    FlapsLandingCustom = CHAIN( PULSE+Flaps_Landing_Position, D(), LedOn(4));
-
     MapKey(&Throttle, FLAPU, FlapsUpCustom);
     MapKey(&Throttle, FLAPM, FlapsDownCustom);
     MapKey(&Throttle, FLAPD, FlapsLandingCustom);
@@ -144,29 +143,26 @@ int main()
     MapKeyIO(&Throttle, LDGH, PULSE+Gear_Light_Near_Far_Off, PULSE+Audible_Warning_Reset);
 
     // Throttle Friction Control
-    LandingGearUpCustom   = CHAIN( PULSE+Landing_Gear_Up,   D(), LedOff(5));
-    LandingGearDownCustom = CHAIN( PULSE+Landing_Gear_Down, D(), LedOn(5));
-
     KeyAxis(&Throttle, THR_FC, 0, AXMAP2( LIST( 0, 20, 80 ), LandingGearUpCustom, 0, LandingGearDownCustom));
 
     // APU Start
     //
 
     // Engine Operate
-    MapKey(&Throttle, EOLIGN, EXEC("setEngine(Left, 1, 1);"));
-    MapKey(&Throttle, EORIGN, EXEC("setEngine(Right, 1, 1);"));
+    MapKey(&Throttle, EOLIGN, EXEC("setEngine(Left, Start, 1);"));
+    MapKey(&Throttle, EORIGN, EXEC("setEngine(Right, Start, 1);"));
 
-    MapKey(&Throttle, EOLMOTOR, EXEC("setEngine(Left, 0);"));
-    MapKey(&Throttle, EORMOTOR, EXEC("setEngine(Right, 0);"));
+    MapKey(&Throttle, EOLMOTOR, EXEC("setEngine(Left, Stop);"));
+    MapKey(&Throttle, EORMOTOR, EXEC("setEngine(Right, Stop);"));
 
     // Engine Fuel Flow
     //
 
     // Idle
-    MapKey(&Throttle,  IDLELON, EXEC("setEngine(Left,  0);"));
-    MapKeyR(&Throttle, IDLELON, EXEC("setEngine(Left,  1);"));
-    MapKey(&Throttle,  IDLERON, EXEC("setEngine(Right, 0);"));
-    MapKeyR(&Throttle, IDLERON, EXEC("setEngine(Right, 1);"));
+    MapKey(&Throttle,  IDLELON, EXEC("setEngine(Left,  Stop);"));
+    MapKeyR(&Throttle, IDLELON, EXEC("setEngine(Left,  Start);"));
+    MapKey(&Throttle,  IDLERON, EXEC("setEngine(Right, Stop);"));
+    MapKeyR(&Throttle, IDLERON, EXEC("setEngine(Right, Start);"));
 
     // Throttle
     KeyAxis(&Throttle, THR_LEFT, 0, AXMAP2( LIST( 0, 80, 81 ),
@@ -178,13 +174,11 @@ int main()
         EXEC("setAfterburner(Engine_Right, 1);")
     ));
 
-
     // EAC
     //
 
     // Autopilot Engage / Disengage
-    AutopilotToggle = SEQ(EXEC("autopilotEngage();"), Autopilot_Disengage);
-    MapKey(&Throttle, APENG, AutopilotToggle);
+    MapKey(&Throttle, APENG, EXEC("autopilotToggle();"));
 
 }
 

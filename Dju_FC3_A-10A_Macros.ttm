@@ -3,10 +3,13 @@
 // Util
 define Engine_Left  0
 define        Left  0
+
 define Engine_Right 1
 define        Right 1
+
 define        Stop  0
 define        Start 1
+define        AftB  2
 
 
 // Autopilot **********************

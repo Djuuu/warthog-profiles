@@ -2,6 +2,9 @@
 include "Dju_FC3_A-10A_Macros.ttm"
 include "Dju_TrackIR_Macros.ttm"
 
+// Useful arrays **************************************************************
+int LedArray[] = {LED0, LED1, LED2, LED3, LED4, LED5};
+int IdleSwitch[] = {IDLELON, IDLERON};
 // Custom actions **************************************************************
 
 int SensorCurveM, SensorCurveL;	 // Custom curves for slew control
@@ -12,19 +15,32 @@ int AirbrakeOnCustom, AirbrakeOffCustom;                // With LED indicator
 int ModeAACustom, ModeAGCustom, ModeNavCustom;          // With LED indicator
 int FlapsUpCustom, FlapsDownCustom, FlapsLandingCustom; // With LED indicator
 
-int AutopilotToggle; // Autopilot toggle
-
 int BaclightLow, BaclightHigh; // Backlight intensity setting
-
-int LedArray[6] = {LED0, LED1, LED2, LED3, LED4, LED5};
 
 // Flags **************************************************************
 
 char Autopilot_Status;
 char Engine_Left_Status, Engine_Right_Status;
+char ExtView;
 
 // Custom functions **************************************************************
 
+int setExtView(int view)
+{
+    ActKey(KEYON+PULSE+view);
+    if (view != F1_Cockpit_view) {
+        ExtView = 1;
+    }
+}
+int resetView()
+{
+    if (ExtView == 1) {
+        ActKey(KEYON+PULSE+F1_Cockpit_view);
+        ExtView = 0;
+    }
+}
+
+// Engine start / stop
 int setEngine(int engine, int status, int checkThrottle=0)
 {
     if (engine == Engine_Left) {
@@ -79,6 +95,34 @@ int LedOff(int i)
     return LED(&Throttle, LED_ONOFF, LED_CURRENT-LedArray[i]);
 }
 
+// Turns LED i on with blinking transition (function)
+int BlinkToOn(int i, int duration=3000)
+{
+    int step = 250;
+    int time = 0;
+    ActKey(KEYON+PULSE+LedOn(0));
+    while (time<duration) {
+        time = time + step;
+        DeferCall(time, &ActKey, KEYON+PULSE+LedOff(i));
+        time = time + step;
+        DeferCall(time, &ActKey, KEYON+PULSE+LedOn(i));
+    }
+}
+
+// Turns LED i on with blinking transition (function)
+int BlinkToOff(int i, int duration=3000)
+{
+    int step = 250;
+    int time = 0;
+    ActKey(KEYON+PULSE+LedOff(0));
+    while (time<duration) {
+        time = time + step;
+        DeferCall(time, &ActKey, KEYON+PULSE+LedOn(i));
+        time = time + step;
+        DeferCall(time, &ActKey, KEYON+PULSE+LedOff(i));
+    }
+}
+
 // Engine power indication
 int updateBacklight()
 {
@@ -99,11 +143,21 @@ int updateBacklight()
 // Autopilot function, depending on LASTE switches states
 int autopilotEngage()
 {
-    if(Throttle[APPAT])                          ActKey(KEYON+PULSE+Autopilot_Route_following);             // PATH
-    else if(Throttle[APALT] & Throttle[RDRDIS])  ActKey(KEYON+PULSE+Autopilot_Barometric_Altitude_Hold); // ALT (baro)
-    else if (Throttle[APALT] & Throttle[RDRNRM]) ActKey(KEYON+PULSE+Autopilot_Radar_Altitude_Hold);  // ALT (radar)
-    else                                         ActKey(KEYON+PULSE+Autopilot_Altitude_And_Roll_Hold); // APAH
-    Autopilot_Status = !Autopilot_Status;
+         if(Throttle[APPAT])   ActKey(KEYON+PULSE+Autopilot_Route_following);          // PATH
+    else if (Throttle[APAH])   ActKey(KEYON+PULSE+Autopilot_Altitude_And_Roll_Hold);   // ALT/HDG
+    else if (Throttle[RDRDIS]) ActKey(KEYON+PULSE+Autopilot_Barometric_Altitude_Hold); // ALT (baro)
+    else if (Throttle[RDRNRM]) ActKey(KEYON+PULSE+Autopilot_Radar_Altitude_Hold);      // ALT (radar)
+    Autopilot_Status = 1;
+}
+int autopilotDisengage()
+{
+    ActKey(KEYON+PULSE+Autopilot_Disengage);
+    Autopilot_Status = 0;
+}
+int autopilotToggle()
+{
+    if (Autopilot_Status) autopilotDisengage();
+    else                  autopilotEngage();
 }
 
 // init function
@@ -113,6 +167,7 @@ int initCustomCommands()
     Autopilot_Status = 0;
     Engine_Left_Status = 0;
     Engine_Right_Status = 0;
+    ExtView = 0;
 
     // Custom commands init
     SensorCurveM = LIST(0,32, 45,50, 55,50, 100,68); // Medium sensitivity curve for sensor control
@@ -126,6 +181,17 @@ int initCustomCommands()
 
     AirbrakeOnCustom  = CHAIN( PULSE+Airbrake_On,  D(), LedOn(3));
     AirbrakeOffCustom = CHAIN( PULSE+Airbrake_Off, D(), LedOff(3));
+
+    FlapsUpCustom      = CHAIN( PULSE+Flaps_Up,               D(), LedOff(4));
+    FlapsDownCustom    = CHAIN( PULSE+Flaps_Up_Down,          D(), LedOn(4));
+    FlapsLandingCustom = CHAIN( PULSE+Flaps_Landing_Position, D(), LedOn(4));
+
+    LandingGearUpCustom   = CHAIN( PULSE+Landing_Gear_Up,   D(), EXEC("BlinkToOff(5);"));
+    LandingGearDownCustom = CHAIN( PULSE+Landing_Gear_Down, D(), EXEC("BlinkToOn(5);"));
+
+    ModeAACustom  = CHAIN( PULSE+_6__Longitudinal_Missile_Aiming_Mode, D(), LedOn(1),  LedOff(2));
+    ModeAGCustom  = CHAIN( PULSE+_7__Air_To_Ground_Mode,               D(), LedOn(1),  LedOn(2));
+    ModeNavCustom = CHAIN( PULSE+_1__Navigation_Modes,                 D(), LedOff(1), LedOff(2));
 
     // 43, 86, 129, 172, 215
     BaclightLow  = LED(&Throttle, LED_INTENSITY, 43);
