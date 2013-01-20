@@ -5,6 +5,8 @@ include "Dju_TrackIR_Macros.ttm"
 // Useful arrays **************************************************************
 int LedArray[] = {LED0, LED1, LED2, LED3, LED4, LED5};
 int IdleSwitch[] = {IDLELON, IDLERON};
+int EngineCommand[] = {Engine_Left_Stop, Engine_Left_Start, Engine_Right_Stop, Engine_Right_Start};
+
 // Custom actions **************************************************************
 
 int SensorCurveM, SensorCurveL;	 // Custom curves for slew control
@@ -20,7 +22,7 @@ int BaclightLow, BaclightHigh; // Backlight intensity setting
 // Flags **************************************************************
 
 char Autopilot_Status;
-char Engine_Left_Status, Engine_Right_Status;
+char Engine_Status[2];
 char ExtView;
 
 // Custom functions **************************************************************
@@ -43,44 +45,35 @@ int resetView()
 // Engine start / stop
 int setEngine(int engine, int status, int checkThrottle=0)
 {
-    if (engine == Engine_Left) {
-        if (status == 1) {
-            if(!(checkThrottle) | !(Throttle[IDLELON])) {
-                ActKey(KEYON+PULSE+Engine_Left_Start);
-                if (Engine_Left_Status == 0) {
-                    Engine_Left_Status = 1;
-                }
+    int command = EngineCommand[(engine<<1)|status];
+
+    if (status == Start) {
+        if(!(checkThrottle) | !(Throttle[IdleSwitch[engine]])) {
+            ActKey(KEYON+PULSE+command);
+            if (Engine_Status[engine] == Stop) {
+                Engine_Status[engine] = status;
             }
-        } else {
-            ActKey(KEYON+PULSE+Engine_Left_Stop);
-            Engine_Left_Status = 0;
-        }
-    } else {
-        if (status == 1) {
-            if(!(checkThrottle) | !(Throttle[IDLERON])) {
-                ActKey(KEYON+PULSE+Engine_Right_Start);
-                if (Engine_Right_Status == 0) {
-                    Engine_Right_Status = 1;
-                }
-            }
-        } else {
-            ActKey(KEYON+PULSE+Engine_Right_Stop);
-            Engine_Right_Status = 0;
         }
     }
+    else {
+        ActKey(KEYON+PULSE+command);
+        Engine_Status[engine] = status;
+    }
+
     updateBacklight();
 }
 
 // Afterburner indication
-int setAfterburner(int engine, int status)
+int setAfterburner(int engine, int on)
 {
-    if (engine == Engine_Left) {
-        if (Engine_Left_Status == 0) return 0;
-        Engine_Left_Status = status + 1;
-    } else {
-        if (Engine_Right_Status == 0) return 0;
-        Engine_Right_Status = status + 1;
+    if (Engine_Status[engine] == Stop) return 0;
+    if (on & Engine_Status[engine] == Start) {
+        Engine_Status[engine] = AftB;
     }
+    else if(!on & Engine_Status[engine] == AftB) {
+        Engine_Status[engine] = Start;
+    }
+
     updateBacklight();
 }
 
@@ -126,12 +119,12 @@ int BlinkToOff(int i, int duration=3000)
 // Engine power indication
 int updateBacklight()
 {
-    if ((Engine_Left_Status == 0) & (Engine_Right_Status == 0)) {
+    if ((Engine_Status[Left] == 0) & (Engine_Status[Right] == 0)) {
         ActKey(KEYON+PULSE+LedOff(0)); // OFF
     }
     else {
         ActKey(KEYON+PULSE+LedOn(0)); // ON
-        if ((Engine_Left_Status == 2) | (Engine_Right_Status == 2)) {
+        if ((Engine_Status[Left] == 2) | (Engine_Status[Right] == 2)) {
             ActKey(KEYON+PULSE+BaclightHigh); // Afterburner
         }
         else {
@@ -165,8 +158,9 @@ int initCustomCommands()
 {
     // Flag init
     Autopilot_Status = 0;
-    Engine_Left_Status = 0;
-    Engine_Right_Status = 0;
+    Engine_Status[Left] = 0;
+    Engine_Status[Right] = 0;
+
     ExtView = 0;
 
     // Custom commands init
