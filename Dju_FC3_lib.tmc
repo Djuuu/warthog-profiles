@@ -7,6 +7,10 @@ int LedArray[] = {LED0, LED1, LED2, LED3, LED4, LED5};
 int IdleSwitch[] = {IDLELON, IDLERON};
 int EngineCommand[4];
 
+char RippleIntIndex=1;
+char RippleQtyIndex=1;
+
+
 // Custom actions **************************************************************
 
 int SensorCurveM, SensorCurveL;	 // Custom curves for slew control

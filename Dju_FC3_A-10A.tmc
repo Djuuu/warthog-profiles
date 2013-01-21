@@ -121,9 +121,9 @@ int main()
 
     // Coolie Switch
     MapKeyIOUMD(&Throttle, CSU, 0, 0,   0, 0,   PULSE+Salvo_Mode,   PULSE+PRS_SGL_Release_Submodes_Cycle);
-    MapKeyIOUMD(&Throttle, CSD, 0, 0,   0, 0,   0,                  PULSE+Ripple_Quantity_Select);
-    MapKeyIOUMD(&Throttle, CSR, 0, 0,   0, 0,   0,                  PULSE+Ripple_Interval_Increase);
-    MapKeyIOUMD(&Throttle, CSL, 0, 0,   0, 0,   0,                  PULSE+Ripple_Interval_Decrease);
+    MapKeyIOUMD(&Throttle, CSD, 0, 0,   0, 0,   0,                  REXEC(RippleQtyIndex, 300, "ActKey(KEYON+PULSE+Ripple_Quantity_Select);"));
+    MapKeyIOUMD(&Throttle, CSR, 0, 0,   0, 0,   0,                  REXEC(RippleIntIndex, 250, "ActKey(KEYON+PULSE+Ripple_Interval_Increase);"));
+    MapKeyIOUMD(&Throttle, CSL, 0, 0,   0, 0,   0,                  REXEC(RippleIntIndex, 250, "ActKey(KEYON+PULSE+Ripple_Interval_Decrease);"));
 
     // Slew Control
     MapKeyIO(&Throttle, SC, PULSE+Target_Unlock, PULSE+Target_Lock);
