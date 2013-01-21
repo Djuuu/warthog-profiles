@@ -28,16 +28,18 @@ int main()
     MapAxis(&Throttle, THR_RIGHT, DX_Z_AXIS, AXIS_NORMAL, MAP_ABSOLUTE);
     MapAxis(&Throttle, THR_LEFT, DX_ZROT_AXIS, AXIS_NORMAL, MAP_ABSOLUTE);
     MapAxis(&Throttle, THR_FC, DX_SLIDER_AXIS, AXIS_NORMAL, MAP_ABSOLUTE);
-    MapAxis(&Throttle, SCX, DX_XROT_AXIS, AXIS_REVERSED, MAP_RELATIVE);
-    MapAxis(&Throttle, SCY, DX_YROT_AXIS, AXIS_REVERSED, MAP_RELATIVE);
 
-    SetSCurve(&Throttle, SCX, 0, 0, 0, 0, -4);
-    SetSCurve(&Throttle, SCY, 0, 0, 0, 0, -4);
+    MapAxis(&Throttle, SCX, DX_XROT_AXIS, AXIS_NORMAL, MAP_ABSOLUTE);
+    MapAxis(&Throttle, SCY, DX_YROT_AXIS, AXIS_REVERSED, MAP_ABSOLUTE);
+
     SetSCurve(&Joystick, JOYX, 0, 0, 0, 2, 0);
     SetSCurve(&Joystick, JOYY, 0, 0, 0, 2, 0);
     SetJCurve(&Throttle, THR_RIGHT, 80, 96);
     SetJCurve(&Throttle, THR_LEFT, 80, 96);
     SetSCurve(&Throttle, THR_FC, 0, 0, 0, 0, 0);
+
+    SetSCurve(&Throttle, SCX, 0, 0, 0, 0, -2);
+    SetSCurve(&Throttle, SCY, 0, 0, 0, 0, -2);
 
     // Joystick **************************************************************
 
