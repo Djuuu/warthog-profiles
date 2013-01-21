@@ -78,15 +78,15 @@ int initCustomCommands()
                          EXEC("SetCustomCurve(&Throttle, SCX, SensorCurveM);",
                               "SetCustomCurve(&Throttle, SCY, SensorCurveM);"));
 
-    AirbrakeOnCustom  = CHAIN( PULSE+Airbrake_On,  D(), LedOn(3));
-    AirbrakeOffCustom = CHAIN( PULSE+Airbrake_Off, D(), LedOff(3));
+    AirbrakeOnCustom  = CHAIN( PULSE+Airbrake_On,  D(), EXEC("BlinkToOn(3, 1500);"));
+    AirbrakeOffCustom = CHAIN( PULSE+Airbrake_Off, D(), EXEC("BlinkToOff(3, 1500);"));
 
-    FlapsUpCustom      = CHAIN( PULSE+Flaps_Up,               D(), LedOff(4));
-    FlapsDownCustom    = CHAIN( PULSE+Flaps_Up_Down,          D(), LedOn(4));
-    FlapsLandingCustom = CHAIN( PULSE+Flaps_Landing_Position, D(), LedOn(4));
+    FlapsUpCustom      = CHAIN( PULSE+Flaps_Up,               D(), EXEC("BlinkToOff(4);"));
+    FlapsDownCustom    = CHAIN( PULSE+Flaps_Up_Down,          D(), EXEC("BlinkToOn(4);"));
+    FlapsLandingCustom = CHAIN( PULSE+Flaps_Landing_Position, D(), EXEC("BlinkToOn(4);"));
 
-    LandingGearUpCustom   = CHAIN( PULSE+Landing_Gear_Up,   D(), EXEC("BlinkToOff(5);"));
-    LandingGearDownCustom = CHAIN( PULSE+Landing_Gear_Down, D(), EXEC("BlinkToOn(5);"));
+    LandingGearUpCustom   = CHAIN( PULSE+Landing_Gear_Up,   D(), EXEC("BlinkToOff(5, 2500);"));
+    LandingGearDownCustom = CHAIN( PULSE+Landing_Gear_Down, D(), EXEC("BlinkToOn(5, 2500);"));
 
     ModeAACustom  = CHAIN( PULSE+_6__Longitudinal_Missile_Aiming_Mode, D(), LedOn(1),  LedOff(2));
     ModeAGCustom  = CHAIN( PULSE+_7__Air_To_Ground_Mode,               D(), LedOn(1),  LedOn(2));
@@ -161,7 +161,7 @@ int LedOff(int i)
     return LED(&Throttle, LED_ONOFF, LED_CURRENT-LedArray[i]);
 }
 // Turns LED i on with blinking transition (function)
-int BlinkToOn(int i, int duration=3000)
+int BlinkToOn(int i, int duration=2500)
 {
     int step = 250;
     int time = 0;
@@ -174,7 +174,7 @@ int BlinkToOn(int i, int duration=3000)
     }
 }
 // Turns LED i on with blinking transition (function)
-int BlinkToOff(int i, int duration=3000)
+int BlinkToOff(int i, int duration=2000)
 {
     int step = 250;
     int time = 0;
