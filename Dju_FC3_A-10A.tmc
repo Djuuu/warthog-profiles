@@ -111,9 +111,9 @@ int main()
     MapKey(&Throttle, BSM, ModeNavCustom);
 
     // China Hat
-    MapKeyIOUMD(&Throttle, CHF, EXEC("setExtView(F8_Target_view);"),         PULSE+Weapon_Change,
-                                EXEC("setExtView(F8_Target_view);"),         0,
-                                EXEC("setExtView(F8_Target_view);"),         PULSE+Weapon_Change);
+    MapKeyIOUMD(&Throttle, CHF, EXEC("setExtView(F5_nearest_AC_view);"),         PULSE+Weapon_Change,
+                                EXEC("setExtView(F5_nearest_AC_view);"),         0,
+                                EXEC("setExtView(F5_nearest_AC_view);"),         PULSE+Weapon_Change);
 
     MapKeyIOUMD(&Throttle, CHB, EXEC("setExtView(F5_Ground_hostile_view);"), PULSE+Weapon_Change,
                                 EXEC("setExtView(F5_Ground_hostile_view);"), 0,
