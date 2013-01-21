@@ -118,7 +118,7 @@ define	Cover_Me	L_WIN+USB[0x1A]	//Cover Me
 // Sensors **********************
 
 define	Launch_Permission_Override	L_ALT+USB[0x1A]	//Launch Permission Override
-define	Target_Lock	USB[0x00]	//Target Lock
+define	Target_Lock	USB[0x28]	//Target Lock
 define	Target_Unlock	USB[0x2A]	//Target Unlock
 define	RWR_SPO_Sound_Signals_Volume_Up	R_ALT+USB[0x37]	//RWR/SPO Sound Signals Volume Up
 define	Target_Designator_Down	USB[0x37]	//Target Designator Down
