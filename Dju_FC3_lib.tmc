@@ -49,8 +49,8 @@ int initCustomCommands()
     ExtView = 0;
 
     // Custom commands init
-    SensorCurveM = LIST(0,32, 45,50, 55,50, 100,68); // Medium sensitivity curve for sensor control
-    SensorCurveL = LIST(0,40, 45,50, 55,50, 100,60); // Low sensitivity curve used when sensor is zoomed in
+    SensorCurveM = LIST(0,34, 45,50, 55,50, 100,66); // Medium sensitivity curve for sensor control
+    SensorCurveL = LIST(0,38, 43,50, 57,50, 100,62); // Low sensitivity curve used when sensor is zoomed in
 
     // Countermeasures
     CurrentCMProgram = 0;
