@@ -165,7 +165,7 @@ int BlinkToOn(int i, int duration=3000)
 {
     int step = 250;
     int time = 0;
-    ActKey(KEYON+PULSE+LedOn(0));
+    ActKey(KEYON+PULSE+LedOn(i));
     while (time<duration) {
         time = time + step;
         DeferCall(time, &ActKey, KEYON+PULSE+LedOff(i));
@@ -178,7 +178,7 @@ int BlinkToOff(int i, int duration=3000)
 {
     int step = 250;
     int time = 0;
-    ActKey(KEYON+PULSE+LedOff(0));
+    ActKey(KEYON+PULSE+LedOff(i));
     while (time<duration) {
         time = time + step;
         DeferCall(time, &ActKey, KEYON+PULSE+LedOn(i));
