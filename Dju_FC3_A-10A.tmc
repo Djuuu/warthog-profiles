@@ -63,7 +63,7 @@ int main()
     MapKeyIO(&Joystick, H2U, PULSE+All_Labels, 0);             // ^
     MapKey(&Joystick, H2D, PULSE+CCRP_steering_mode);          // v
     MapKey(&Joystick, H2R, PULSE+Target_Designator_To_Center); // >
-    MapKey(&Joystick, H2R, PULSE+RWR_SPO_Mode_Select);         // <
+    MapKey(&Joystick, H2L, PULSE+RWR_SPO_Mode_Select);         // <
 
     // Data Management Switch
     MapKeyUMD(&Joystick, H3U, ZoomInCustom,    PULSE+_Next_Waypoint__Airfield_Or_Target,   ZoomInCustom);
