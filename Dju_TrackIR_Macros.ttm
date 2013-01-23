@@ -1,0 +1,6 @@
+// ------------------------------------------  T.A.R.G.E.T Macros File ------------------------------------------
+
+// TrackIR **********************
+
+define	TrackIR_center	R_SHIFT+USB[0x31] //TrackIR center
+define	TrackIR_pause	R_CTL+USB[0x31]	//TrackIR pause

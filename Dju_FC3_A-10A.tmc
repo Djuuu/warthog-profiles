@@ -1,0 +1,180 @@
+include "target.tmh"
+
+include "Dju_FC2_A_10A_Macros.ttm"
+include "Dju_TrackIR_Macros.ttm"
+
+int main()
+{
+    if(Init(&EventHandle)) return 1;
+
+    // Init
+    Configure(&HCougar, MODE_EXCLUDED);
+    Configure(&T16000, MODE_EXCLUDED);
+    Configure(&LMFD, MODE_EXCLUDED);
+    Configure(&RMFD, MODE_EXCLUDED);
+
+    SetKBRate(50, 50);
+    SetKBLayout(KB_ENG);
+    SetShiftButton(&Joystick, S4, &Throttle, BSF, BSB, 0);
+
+    // Axes ****************************************************************************************************************
+
+    MapAxis(&Joystick, JOYX, DX_X_AXIS, AXIS_NORMAL, MAP_ABSOLUTE);
+    MapAxis(&Joystick, JOYY, DX_Y_AXIS, AXIS_NORMAL, MAP_ABSOLUTE);
+    MapAxis(&Throttle, SCX, DX_XROT_AXIS, AXIS_REVERSED, MAP_RELATIVE);
+    MapAxis(&Throttle, SCY, DX_YROT_AXIS, AXIS_REVERSED, MAP_RELATIVE);
+    MapAxis(&Throttle, THR_RIGHT, DX_Z_AXIS, AXIS_NORMAL, MAP_ABSOLUTE);
+    MapAxis(&Throttle, THR_LEFT, DX_ZROT_AXIS, AXIS_NORMAL, MAP_ABSOLUTE);
+    MapAxis(&Throttle, THR_FC, DX_SLIDER_AXIS, AXIS_NORMAL, MAP_ABSOLUTE);
+
+    SetSCurve(&Joystick, JOYX, 0, 0, 0, 2, 0);
+    SetSCurve(&Joystick, JOYY, 0, 0, 0, 2, 0);
+    SetJCurve(&Throttle, THR_RIGHT, 80, 96);
+    SetJCurve(&Throttle, THR_LEFT, 80, 96);
+    SetSCurve(&Throttle, SCX, 0, 0, 0, 0, -4);
+    SetSCurve(&Throttle, SCY, 0, 0, 0, 0, -4);
+    SetSCurve(&Throttle, THR_FC, 0, 0, 0, 0, 0);
+
+    // Joystick ****************************************************************************************************************
+
+    // Gun trigger
+    MapKeyUMD(  &Joystick, TG1, Weapon_Fire,
+                                PULSE+Smoke,
+                                Weapon_Fire);
+    // Weapons Release Button
+    MapKeyIOUMD(&Joystick, S2,  Weapon_Release, Weapon_Release,
+                                PULSE+Refueling_Bay, Fuel_Dump,
+                                Weapon_Release, Weapon_Release);
+    // Master Mode Control Button
+    MapKeyIOUMD(&Joystick, S1,  PULSE+Launch_Permission_Override, PULSE+Cannon,
+                                PULSE+HUD_Color,                  PULSE+HUD_Color,
+                                PULSE+Launch_Permission_Override, PULSE+Cannon);
+    // Nosewheel Steering Button
+    MapKey(&Joystick, S3,       PULSE+Trim_Reset);
+
+    // Target Management Switch
+    MapKeyIO(&Joystick, H2U, PULSE+All_Labels, 0);             // ^
+    MapKeyUMD(&Joystick, H2D, 0, 0, PULSE+CCRP_steering_mode); // v
+// TODO : PULSE+RWR_SPO_Mode_Select
+
+    // Data Management Switch
+    MapKeyUMD(&Joystick, H3U, PULSE+Display_Zoom_In,    PULSE+_Next_Waypoint__Airfield_Or_Target,   PULSE+Display_Zoom_In);
+    MapKeyUMD(&Joystick, H3D, PULSE+Display_Zoom_Out,   PULSE+_Next_Waypoint__Airfield_Or_Target,   PULSE+Display_Zoom_Out);
+    MapKeyUMD(&Joystick, H3R, 0,                        PULSE+_1__Navigation_Modes,                 0);
+    MapKeyUMD(&Joystick, H3L, 0,                        PULSE+_1__Navigation_Modes,                 0);
+
+    // Countermeasures Management Switch
+    MapKeyIO(&Joystick, H4P, PULSE+ECM, PULSE+TrackIR_center);
+    MapKey(&Joystick, H4U, PULSE+Countermeasures_Continuously_Dispense);
+    MapKey(&Joystick, H4D, PULSE+Countermeasures_Release);
+    MapKey(&Joystick, H4L, PULSE+Countermeasures_Chaff_Dispense);
+    MapKey(&Joystick, H4R, PULSE+Countermeasures_Flares_Dispense);
+
+    // Trim Switch
+    MapKey(&Joystick, H1U, Trim_Down);
+    MapKey(&Joystick, H1D, Trim_Up);
+    MapKeyIO(&Joystick, H1L, Trim_Left_Rudder, Trim_Left);
+    MapKeyIO(&Joystick, H1R, Trim_Right_Rudder, Trim_Right);
+
+    // Throttle ****************************************************************************************************************
+
+    // Slew Control
+    MapKeyIO(&Throttle, SC, PULSE+Target_Unlock, PULSE+Target_Lock);
+
+    // Mic Switch
+    MapKeyIO(&Throttle, MSP, PULSE+TrackIR_pause, PULSE+Communication_menu);
+    MapKeyIOUMD(&Throttle, MSU, 0, PULSE+Flight_Attack_air_defenses,    0, PULSE+Request_AWACS_Available_Tanker,
+                                0, PULSE+Flight_Attack_air_defenses);
+    MapKeyIOUMD(&Throttle, MSR, 0, PULSE+Attack_My_Target,              0, PULSE+Toggle_Formation,
+                                0, PULSE+Attack_My_Target);
+    MapKeyIOUMD(&Throttle, MSD, 0, PULSE+Flight_Attack_ground_targets,  0, PULSE+Request_AWACS_Home_Airbase,
+                                0, PULSE+Flight_Attack_ground_targets);
+    MapKeyIOUMD(&Throttle, MSL, 0, PULSE+Cover_Me,                      0, PULSE+Join_Up_Formation,
+                                0, PULSE+Cover_Me);
+
+    // Speedbrake
+    MapKey(&Throttle, SPDF,
+        CHAIN( PULSE+Airbrake_On, D(), LED(&Throttle, LED_ONOFF, LED_CURRENT+LED3))
+    );
+    MapKey(&Throttle, SPDM,
+        CHAIN( PULSE+Airbrake_Off, D(), LED(&Throttle, LED_ONOFF, LED_CURRENT-LED3))
+    );
+    MapKeyIO(&Throttle, SPDB,
+        PULSE+Canopy_Open_Close,
+        CHAIN( PULSE+Airbrake_On, D(), LED(&Throttle, LED_ONOFF, LED_CURRENT+LED3))
+    );
+
+    // Boat Switch
+    MapKey(&Throttle, BSF,
+        CHAIN( PULSE+_6__Longitudinal_Missile_Aiming_Mode,
+        D(), LED(&Throttle, LED_ONOFF, LED_CURRENT+LED1), D(), LED(&Throttle, LED_ONOFF, LED_CURRENT-LED2))
+    );
+    MapKey(&Throttle, BSB,
+        CHAIN( PULSE+_7__Air_To_Ground_Mode,
+        D(), LED(&Throttle, LED_ONOFF, LED_CURRENT+LED1), D(), LED(&Throttle, LED_ONOFF, LED_CURRENT+LED2))
+    );
+    MapKey(&Throttle, BSM,
+        CHAIN( PULSE+_1__Navigation_Modes,
+        D(), LED(&Throttle, LED_ONOFF, LED_CURRENT-LED1), D(), LED(&Throttle, LED_ONOFF, LED_CURRENT-LED2))
+    );
+
+    // China Hat
+    MapKeyIOUMD(&Throttle, CHF, 0, PULSE+USB[7], 0, 0, 0, PULSE+USB[7]);
+    MapKeyIOUMD(&Throttle, CHB, 0, PULSE+USB[7], 0, 0, 0, PULSE+USB[7]);
+
+    // Pinky Switch
+    MapKeyIO(&Throttle, PSF, PULSE+Gear_Light_Near_Far_Off, PULSE+Navigation_lights);
+    MapKeyIO(&Throttle, PSB, PULSE+Gear_Light_Near_Far_Off, PULSE+Illumination_Cockpit);
+    MapKeyIO(&Throttle, PSM, PULSE+Gear_Light_Near_Far_Off, 0);
+
+    // Left Throttle Button
+    MapKeyUMD(&Throttle, LTB, PULSE+F8_Target_view, PULSE+F10_Theater_map_view, PULSE+F5_Ground_hostile_view);
+    MapKeyRIO(&Throttle, LTB, 0, PULSE+F1_Cockpit_view);
+
+    // Landing Gear Horn Silence Button
+    MapKeyIO(&Throttle, LDGH, PULSE+Gear_Light_Near_Far_Off, PULSE+Audible_Warning_Reset);
+
+    // Flaps
+    MapKeyIOUMD(&Throttle, FLAPU,
+        CHAIN( PULSE+Flaps_Up, D(), LED(&Throttle, LED_ONOFF, LED_CURRENT-LED4))
+    );
+    MapKeyIOUMD(&Throttle, FLAPD,
+        CHAIN( PULSE+Flaps_Landing_Position, D(), LED(&Throttle, LED_ONOFF, LED_CURRENT+LED4))
+    );
+    MapKeyIOUMD(&Throttle, FLAPM,
+        CHAIN( PULSE+Flaps_Up_Down, D(), LED(&Throttle, LED_ONOFF, LED_CURRENT+LED4))
+    );
+
+    // Engine Operate
+    MapKey(&Throttle, EOLIGN, PULSE+Engine_Left_Start);
+    MapKey(&Throttle, EORIGN, PULSE+Engine_Right_Start);
+
+    // Idle
+    MapKey(&Throttle,  IDLELON, CHAIN( PULSE+Engine_Left_Stop, D(), LED(&Throttle, LED_ONOFF, LED_CURRENT-LED0)));
+    MapKeyR(&Throttle, IDLELON, CHAIN( PULSE+Engine_Left_Start, D(), LED(&Throttle, LED_ONOFF, LED_CURRENT+LED0)));
+    MapKey(&Throttle,  IDLERON, CHAIN( D(100), PULSE+Engine_Right_Stop));
+    MapKeyR(&Throttle, IDLERON, CHAIN( D(100), PULSE+Engine_Right_Start));
+
+    // Coolie Switch
+    MapKeyIOUMD(&Throttle, CSU, 0, 0,   0, 0,   PULSE+Salvo_Mode,   PULSE+PRS_SGL_Release_Submodes_Cycle);
+    MapKeyIOUMD(&Throttle, CSD, 0, 0,   0, 0,   0,                  PULSE+Ripple_Quantity_Select);
+    MapKeyIOUMD(&Throttle, CSR, 0, 0,   0, 0,   0,                  PULSE+Ripple_Interval_Increase);
+    MapKeyIOUMD(&Throttle, CSL, 0, 0,   0, 0,   0,                  PULSE+Ripple_Interval_Decrease);
+
+    // Throttle Friction Control
+    KeyAxis(&Throttle, THR_FC, 0, AXMAP2( LIST( 0, 20, 80 ),
+        CHAIN( PULSE+Landing_Gear_Up, D(), LED(&Throttle, LED_ONOFF, LED_CURRENT-LED5)), 0,
+        CHAIN( PULSE+Landing_Gear_Down, D(), LED(&Throttle, LED_ONOFF, LED_CURRENT+LED5))
+    ));
+
+    // Throttle
+    KeyAxis(&Throttle, THR_RIGHT, 0, AXMAP2( LIST( 0, 80, 81 ),
+        LED(&Throttle, LED_INTENSITY, 43), 0,
+        LED(&Throttle, LED_INTENSITY, 172)
+    ));
+
+}
+int EventHandle(int type, alias o, int x)
+{
+	DefaultMapping(&o, x);
+}
