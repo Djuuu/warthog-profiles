@@ -129,7 +129,7 @@ int main()
     MapKeyIO(&Throttle, SC, PULSE+Target_Unlock, PULSE+Target_Lock);
 
     // Left Throttle Button
-    MapKeyIO(&Throttle, LTB, Weapons_Jettison, EXEC("autopilotToggle();"));
+    MapKeyIO(&Throttle, LTB, Jettison_Weapons, EXEC("autopilotToggle();"));
 
     // Pinky Switch
     MapKeyIO(&Throttle, PSF, PULSE+Gear_Light_Near_Far_Off, PULSE+Navigation_lights);
