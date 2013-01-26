@@ -1,6 +1,10 @@
 
+// Macros
 include "includes/DCS_A-10C_Macros.ttm"
 include "includes/TrackIR_Macros.ttm"
+
+// Libs
+include "includes/DCS_FC3_SnapViews.tmc"
 include "includes/Warthog_leds.tmc"
 
 // Useful constants and arrays **************************************************************
@@ -50,7 +54,6 @@ int initCustomCommands()
     Engine_Status[Right] = 0;
 
     ExtView = 0;
-
 
     // AirbrakeOnCustom  = CHAIN( PULSE+Airbrake_On,  D(), EXEC("BlinkToOn(3, 1500);"));
     // AirbrakeOffCustom = CHAIN( PULSE+Airbrake_Off, D(), EXEC("BlinkToOff(3, 1500);"));
@@ -162,4 +165,3 @@ int autopilotToggle()
     // if (Autopilot_Status) autopilotDisengage();
     // else                  autopilotEngage();
 }
-

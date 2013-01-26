@@ -1,0 +1,109 @@
+
+char SnapViewOn = 0;
+char SnapViewTemp = 0;
+char SnapViewCurrent = 0;
+
+int Num[] = {KP0, KP1, KP2, KP3, KP4, KP5, KP6, KP7, KP8, KP9};
+
+// Show SnapView i, disengage it if already engaged
+int toggleSnapView(char i)
+{
+    if (SnapViewOn){
+        if (i == SnapViewCurrent) {
+            _snap_release();
+        }
+        else {
+            _snap_set(i);
+        }
+    }
+    else {
+        _snap_hold();
+        _snap_set(i);
+    }
+}
+
+// Show SnapView i temporarily (will be disengaged on button release)
+int tempSnapView(char i)
+{
+    _snap_hold(1);
+    _snap_set(i);
+}
+
+// Disengage temporary SnapViews
+int releaseTempSnapView(char i)
+{
+    if (SnapViewTemp) {
+        _snap_release();
+    }
+}
+
+
+// Engage SnapView lock
+int _snap_hold(char temporary=0)
+{
+    // Locked press-release as PULSE is not atomic:
+    if(!SnapViewOn) {
+    
+        // *** version CTRL + 0 / x / 0 ***
+    
+            // ActKey(LOCK);
+            // ActKey(KEYON+R_CTL+0     );
+            // ActKey(KEYON+      Num[0]); Sleep( kb_delay );
+            // ActKey(            Num[0]);
+            // ActKey(      R_CTL+0     );
+            // ActKey(LOCK);
+        
+        // *** version WIN + x ***
+        
+            ActKey(KEYON+L_WIN+0);
+        
+        SnapViewOn = 1;
+    }
+    
+    if (temporary) {
+        SnapViewTemp = 1;
+    }
+}
+
+// Disengage SnapView lock
+int _snap_release()
+{
+    if(SnapViewOn) {
+    
+        // *** version CTRL + 0 / x / 0 ***
+        
+            // ActKey(LOCK);
+            // ActKey(KEYON+Num[0]); Sleep(kb_delay);
+            // ActKey(      Num[0]);
+            // ActKey(LOCK);
+        
+        // *** version WIN + x ***
+        
+            if (SnapViewCurrent!=-1) {
+                ActKey(Num[SnapViewCurrent]); // release current
+            }   
+            ActKey(L_WIN+0);
+        
+        SnapViewOn = 0;
+        SnapViewTemp = 0;
+        SnapViewCurrent = -1;
+    }
+}
+
+// Set current SnapView
+int _snap_set(char i)
+{
+
+    // *** version CTRL + 0 / x / 0 ***
+
+        // ActKey(KEYON+PULSE+Num[i]); 
+    
+    // *** version WIN + x ***
+    
+        if (SnapViewOn & SnapViewCurrent!=i & SnapViewCurrent!=-1) {
+            ActKey(Num[SnapViewCurrent]); // release current
+        }   
+        ActKey(KEYON+Num[i]); // release current
+    
+    SnapViewCurrent = i;
+}
