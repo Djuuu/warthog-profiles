@@ -1,0 +1,111 @@
+// ****************************************************************************************************************************
+// Mostly copied from dimebug on http://www.checksix-forums.com
+// http://www.checksix-forums.com/showthread.php?t=167675
+// ****************************************************************************************************************************
+
+include "target.tmh"
+
+include "includes/DCS_A-10C_lib.tmc"
+
+
+// ****************************************************************************************************************************
+// Main
+// ****************************************************************************************************************************
+int main()
+{
+
+    // Init **************************************************************
+    
+    Exclude(&HCougar);
+    Exclude(&Joystick);
+    Exclude(&Throttle);
+    Exclude(&LMFD);
+    Exclude(&RMFD);
+
+    // MODE_FILTERED lets the controlleres physically plugged in while launching the script
+    // Allows DCS A-10C to use its native mapping
+    Configure(&Joystick, MODE_FILTERED);
+    Configure(&Throttle, MODE_FILTERED);
+    //Configure(&LMFD, MODE_FILTERED);
+    //Configure(&RMFD, MODE_FILTERED);
+  
+    if(Init(&EventHandle)) return 1;
+    
+    // TrackIR launch
+    system("spawn -w C:\\_Programmes_\\Peripheriques\\TrackIR5\\TrackIR5.exe");
+
+    SetKBRate(50, 50);
+    SetKBLayout(KB_ENG);
+    
+    // Shift button ("I" layer)
+    SetShiftButton(&Joystick, S4);
+    
+    // Axes
+    SetSCurve(&Joystick, JOYX, 0, 0, 0, 2.5, 0);
+    SetSCurve(&Joystick, JOYY, 0, 0, 0, 2, 0);
+    
+    MapAxis(&Throttle, THR_LEFT, DX_ZROT_AXIS, AXIS_REVERSED, MAP_ABSOLUTE);
+    MapAxis(&Throttle, THR_RIGHT, DX_Z_AXIS, AXIS_REVERSED, MAP_ABSOLUTE);
+
+    
+    // Joystick **************************************************************
+    
+    //LED1 blinking when TG1 is pressed, stops blinking and sets LED1 to off when TG1 is released
+    MapKey(&Joystick, TG1, CHAIN((Gun_trigger_stage1), REXEC(0, 150, "doLedToggle(1);")));
+    MapKeyR(&Joystick, TG1, EXEC("doLedOff(1);"));
+
+    // Trim Switch 
+    MapKeyIO(&Joystick, H1U, PULSE+TrackIR_center);
+    MapKeyIO(&Joystick, H1D, PULSE+TrackIR_pause);
+    MapKeyIO(&Joystick, H1R, PULSE+Trim_Reset);
+    
+    // Weapons Release Button
+    MapKeyIO(&Joystick, S2, Pause);
+                                
+    // Master Mode Control Button
+    MapKeyIO(&Joystick, S1, Trim_Reset);
+    
+    
+    // Countermeasures Management Switch
+    MapKeyIO(&Joystick, H4L, SnapView4);
+    MapKeyIO(&Joystick, H4P, SnapView1);
+    MapKeyIO(&Joystick, H4U, SnapView2);
+    MapKeyIO(&Joystick, H4D, SnapView3);
+    MapKeyIO(&Joystick, H4R, SnapView6);
+    
+    // Throttle **************************************************************
+    
+    // Throttle Friction Control
+    // Landing gear on 'I' layer
+    // LED3 blinking when gear is down
+    KeyAxis(&Throttle, THR_FC, 'i', AXMAP2(
+        LIST(0,40,60,100), 
+        CHAIN(
+            (PULSE+LandingGear_up),
+            EXEC("ActKey(PULSE+KEYON+LED(&Throttle, LED_ONOFF, LED_CURRENT-LED3));")), 
+        0, 
+        CHAIN(
+            (PULSE+LandingGear_down),
+            REXEC(0, 500, "ActKey(KEYON+LED(&Throttle, LED_ONOFF, LED_CURRENT^LED3));"))
+    ));
+    MapKey(&Joystick, S4, EXEC("LockAxis(&Throttle, THR_FC, 1);")); // Lock axis on 'I' layer
+    MapKeyR(&Joystick, S4, EXEC("LockAxis(&Throttle, THR_FC, 0);")); // Unlock on 'O' layer
+
+    
+    
+    
+}
+
+// ****************************************************************************************************************************
+// Eventhndler
+// ****************************************************************************************************************************
+int EventHandle(int type, alias o, int x)
+{
+    if(x >= IN_POSITION_AXES & x < IN_POSITION_HAT)
+    {
+        GetAxisData(&o, x);
+        if(!axdata.locked) GameOutput(&o, x, clip(AxisVal(o[x], &axdata), -AMAX, AMAX));
+    }
+    else if(!Joystick[S4] | !o[x]) GameOutput(&o, x, o[x]);
+    DefaultMapping(&o, x);
+}

@@ -1,0 +1,165 @@
+
+include "includes/DCS_A-10C_Macros.ttm"
+include "includes/TrackIR_Macros.ttm"
+include "includes/Warthog_leds.tmc"
+
+// Useful constants and arrays **************************************************************
+
+define Engine_Left  0
+define        Left  0
+
+define Engine_Right 1
+define        Right 1
+
+define        Stop  0
+define        Start 1
+define        AftB  2
+
+
+int IdleSwitch[] = {IDLELON, IDLERON};
+int EngineCommand[4];
+
+
+// Custom actions **************************************************************
+
+int LandingGearUpCustom, LandingGearDownCustom;         // With LED indicator
+int AirbrakeOnCustom, AirbrakeOffCustom;                // With LED indicator
+int FlapsUpCustom, FlapsDownCustom, FlapsLandingCustom; // With LED indicator
+
+
+// Flags **************************************************************
+
+char Engine_Status[2];
+char ExtView;
+
+
+// Custom functions **************************************************************
+
+// init function
+int initCustomCommands()
+{
+    printf("Dju_A-10C_lib.tmc init \xa");
+
+    // EngineCommand[0] = Engine_Left_Stop;   // (Left  << 1) | Stop
+    // EngineCommand[1] = Engine_Left_Start;  // (Left  << 1) | Start
+    // EngineCommand[2] = Engine_Right_Stop;  // (Right << 1) | Stop
+    // EngineCommand[3] = Engine_Right_Start; // (Right << 1) | Start
+
+    // Flag init
+    Engine_Status[Left] = 0;
+    Engine_Status[Right] = 0;
+
+    ExtView = 0;
+
+
+    // AirbrakeOnCustom  = CHAIN( PULSE+Airbrake_On,  D(), EXEC("BlinkToOn(3, 1500);"));
+    // AirbrakeOffCustom = CHAIN( PULSE+Airbrake_Off, D(), EXEC("BlinkToOff(3, 1500);"));
+
+    // FlapsUpCustom      = CHAIN( PULSE+Flaps_Up,               D(), EXEC("BlinkToOff(4);"));
+    // FlapsDownCustom    = CHAIN( PULSE+Flaps_Up_Down,          D(), EXEC("BlinkToOn(4);"));
+    // FlapsLandingCustom = CHAIN( PULSE+Flaps_Landing_Position, D(), EXEC("BlinkToOn(4);"));
+
+    // LandingGearUpCustom   = CHAIN( PULSE+Landing_Gear_Up,   D(), EXEC("BlinkToOff(5, 2500);"));
+    // LandingGearDownCustom = CHAIN( PULSE+Landing_Gear_Down, D(), EXEC("BlinkToOn(5, 2500);"));
+
+    // ModeAACustom  = CHAIN( PULSE+_6__Longitudinal_Missile_Aiming_Mode, D(), LedOn(1),  LedOff(2));
+    // ModeAGCustom  = CHAIN( PULSE+_7__Air_To_Ground_Mode,               D(), LedOn(1),  LedOn(2));
+    // ModeNavCustom = CHAIN( PULSE+_1__Navigation_Modes,                 D(), LedOff(1), LedOff(2));
+
+    // 43, 86, 129, 172, 215
+    BaclightLow  = LED(&Throttle, LED_INTENSITY, 43);
+    BaclightHigh = LED(&Throttle, LED_INTENSITY, 172);
+}
+
+
+// Sets view to external view
+int setExtView(int view)
+{
+    // ActKey(KEYON+PULSE+view);
+    // if (view != F1_Cockpit_view) {
+        // ExtView = 1;
+    // }
+}
+// Resets view to F1 internal view
+int resetView()
+{
+    // if (ExtView == 1) {
+        // ActKey(KEYON+PULSE+F1_Cockpit_view);
+        // ExtView = 0;
+    // }
+}
+
+// Engine start / stop
+int doSetEngine(int engine, int status)
+{
+    // Adds delay to one engine to avoid keyboard shortcut conflict
+    // when both engines are turned on/off simultaneously
+    // DeferCall(engine * kb_delay * 2, &ActKey, KEYON+PULSE+EngineCommand[(engine<<1)|status]);
+    // Engine_Status[engine] = status;
+    // updateBacklight();
+}
+// Engine start / stop
+// Checks if engine can be started and keeps track of engine status
+int setEngine(int engine, int status, int checkThrottle=0)
+{
+    // If status is Start, checks if the enfine is fueled
+    // if (  status == Start
+        // & checkThrottle
+        // & Throttle[IdleSwitch[engine]]) { return 0;}
+
+    // doSetEngine(engine, status);
+}
+// Afterburner indication
+// Checks if engine is started and keeps track of engine status
+int setAfterburner(int engine, int on)
+{
+    // if (Engine_Status[engine] == Stop) return 0;
+    // if (on & Engine_Status[engine] == Start) {
+        // Engine_Status[engine] = AftB;
+    // }
+    // else if(!on & Engine_Status[engine] == AftB) {
+        // Engine_Status[engine] = Start;
+    // }
+
+    updateBacklight();
+}
+
+
+
+// Engine power indication
+int updateBacklight()
+{
+    // if ((Engine_Status[Left] == 0) & (Engine_Status[Right] == 0)) {
+        // ActKey(KEYON+PULSE+LedOff(0)); // OFF
+    // }
+    // else {
+        // ActKey(KEYON+PULSE+LedOn(0)); // ON
+        // if ((Engine_Status[Left] == 2) | (Engine_Status[Right] == 2)) {
+            // ActKey(KEYON+PULSE+BaclightHigh); // Afterburner
+        // }
+        // else {
+            // ActKey(KEYON+PULSE+BaclightLow); // standard
+        // }
+    // }
+}
+
+// Autopilot function, depending on LASTE switches states
+int autopilotEngage()
+{
+         // if(Throttle[APPAT])   ActKey(KEYON+PULSE+Autopilot_Route_following);          // PATH
+    // else if (Throttle[APAH])   ActKey(KEYON+PULSE+Autopilot_Altitude_And_Roll_Hold);   // ALT/HDG
+    // else if (Throttle[RDRDIS]) ActKey(KEYON+PULSE+Autopilot_Barometric_Altitude_Hold); // ALT (baro)
+    // else if (Throttle[RDRNRM]) ActKey(KEYON+PULSE+Autopilot_Radar_Altitude_Hold);      // ALT (radar)
+    // Autopilot_Status = 1;
+}
+int autopilotDisengage()
+{
+    // ActKey(KEYON+PULSE+Autopilot_Disengage);
+    // Autopilot_Status = 0;
+}
+int autopilotToggle()
+{
+    // if (Autopilot_Status) autopilotDisengage();
+    // else                  autopilotEngage();
+}
+

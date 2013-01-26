@@ -1,0 +1,63 @@
+
+int LedArray[] = {LED0, LED1, LED2, LED3, LED4, LED5};
+
+int BaclightLow, BaclightHigh; // Backlight intensity setting
+
+
+// Turns LED i on
+int LedOn(int i)
+{
+    return LED(&Throttle, LED_ONOFF, LED_CURRENT+LedArray[i]);
+}
+int doLedOn(int i)
+{
+    ActKey(KEYON+PULSE+LedOn(i));
+}
+
+// Turns LED i off
+int LedOff(int i)
+{
+    return LED(&Throttle, LED_ONOFF, LED_CURRENT-LedArray[i]);
+}
+int doLedOff(int i)
+{
+    ActKey(KEYON+PULSE+LedOff(i));
+}
+
+// Toggles LED i on/off
+int LedToggle(int i)
+{
+    return LED(&Throttle, LED_ONOFF, LED_CURRENT^LedArray[i]);
+}
+int doLedToggle(int i)
+{
+    ActKey(KEYON+PULSE+LedToggle(i));
+}
+
+// Turns LED i on with blinking transition (function)
+int BlinkToOn(int i, int duration=2500, int step = 250)
+{
+    BlinkToState(i, 1, duration, step);
+}
+
+// Turns LED i on with blinking transition (function)
+int BlinkToOff(int i, int duration=2000, int step = 250)
+{
+    BlinkToState(i, 0, duration, step);
+}
+
+// Turns LED i on/off with blinking transition (function)
+int BlinkToState(int i, int state, int duration=2000, int step=250)
+{
+    int time = 0;
+    int led_cmd;
+    if (state<1) { led_cmd = -LedArray[i];}
+    else         { led_cmd = LedArray[i];}
+    
+    ActKey(KEYON+PULSE+led_cmd);
+    while (time<duration) {
+        time = time + step;
+        DeferCall(time, &ActKey, KEYON+PULSE+LedToggle(i));
+    }
+    ActKey(KEYON+PULSE+led_cmd);
+}

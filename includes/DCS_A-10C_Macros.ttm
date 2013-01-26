@@ -1,0 +1,47 @@
+// ------------------------------------------  T.A.R.G.E.T Macros File ------------------------------------------
+
+// define    WIN_L     USB[0xE3] // left windowkey
+// define    WIN_R     USB[0xE7] // left windowkey
+
+
+define	Showcontrolsindicator	R_CTL+ENT	//Show Controls Indicator
+
+
+
+// ---------------------------
+//           HOTAS
+// ---------------------------
+
+define	Gun_trigger_stage1	USB[0x13]	    //Gun trigger stage1
+define	Gun_trigger	        SPC	            //Gun trigger
+define	Trim_Reset	        L_CTL+USB[0x17]	//Trim Reset
+
+// ---------------------------
+//          General
+// ---------------------------
+
+define    Pause     USB[0x48]               //Pause
+
+
+// ---------------------------
+//          Systems
+// ---------------------------
+
+define	LandingGear_up	    L_CTL+USB[0x0a]	    //Landing Gear up
+define	LandingGear_down	L_SHIFT+USB[0x0a]	//Landing Gear down
+
+// ----------------------------------
+//         Views: Cockpit
+// ----------------------------------
+
+define	SnapView0	    L_WIN+KP0	//Snapview 0
+define	SnapView1	    L_WIN+KP1	//Snapview 1
+define	SnapView2	    L_WIN+KP2	//Snapview 2
+define	SnapView3	    L_WIN+KP3	//Snapview 3
+define	SnapView4	    L_WIN+KP4	//Snapview 4
+define	SnapView5	    L_WIN+KP5	//Snapview 5
+define	SnapView6	    L_WIN+KP6	//Snapview 6
+define	SnapView7	    L_WIN+KP7	//Snapview 7
+define	SnapView8	    L_WIN+KP8	//Snapview 8
+define	SnapView9	    L_WIN+KP9	//Snapview 9
+define	ResetSnapView	CTL+KP0	//Resetpanel
