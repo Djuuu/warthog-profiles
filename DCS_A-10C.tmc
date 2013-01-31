@@ -94,12 +94,46 @@ int main()
             (PULSE+LandingGear_down),
             REXEC(0, 500, "ActKey(KEYON+LED(&Throttle, LED_ONOFF, LED_CURRENT^LED3));"))
     ));
-    MapKey(&Joystick, S4, EXEC("LockAxis(&Throttle, THR_FC, 1);")); // Lock axis on 'I' layer
-    MapKeyR(&Joystick, S4, EXEC("LockAxis(&Throttle, THR_FC, 0);")); // Unlock on 'O' layer
 
-    
-    
-    
+    // Axis / layers
+    MapKey(&Joystick, S4, EXEC(
+        // Lock Friction Control axis on 'I' layer
+        "LockAxis(&Throttle, THR_FC, 1);"
+
+        // Use Slew Control as mouse
+        "MapAxis(&Throttle, SCX, MOUSE_X_AXIS, AXIS_NORMAL, MAP_RELATIVE);"
+        "MapAxis(&Throttle, SCY, MOUSE_Y_AXIS, AXIS_NORMAL, MAP_RELATIVE);"
+        "SetSCurve(&Throttle, SCX, 0, 15, 0, 3, -5);"
+        "SetSCurve(&Throttle, SCY, 0, 15, 0, 3, -5);"
+
+        //TEST : invert slew axes
+        // "MapAxis(&Throttle, SCX, DX_YROT_AXIS);"
+        // "MapAxis(&Throttle, SCY, DX_XROT_AXIS);"
+
+    ));
+    MapKeyR(&Joystick, S4, EXEC(
+        // Unlock Friction Control on 'O' layer
+        "LockAxis(&Throttle, THR_FC, 0);"
+
+        // Reset Slew Control axis assignment
+        "MapAxis(&Throttle, SCX, DX_XROT_AXIS);"
+        "MapAxis(&Throttle, SCY, DX_YROT_AXIS);"
+        "SetSCurve(&Throttle, SCX, 0, 0, 0, 0, 0);"
+        "SetSCurve(&Throttle, SCY, 0, 0, 0, 0, 0);"
+    ));
+
+    // default
+    // MapAxis(&Throttle, SCX, DX_XROT_AXIS);
+    // MapAxis(&Throttle, SCY, DX_YROT_AXIS);
+    // SetSCurve(&Throttle, SCX, 0, 0, 0, 0, 0);
+    // SetSCurve(&Throttle, SCY, 0, 0, 0, 0, 0);
+
+    MapKeyIO(&Throttle, SC, MOUSE_LEFT);
+    MapKeyIO(&Throttle, CSL, MOUSE_LEFT);
+    MapKeyIO(&Throttle, CSD, MOUSE_LEFT);
+    MapKeyIO(&Throttle, CSR, MOUSE_RIGHT);
+    MapKeyIO(&Throttle, CSU, MOUSE_RIGHT);
+
 }
 
 // ****************************************************************************************************************************
@@ -107,11 +141,22 @@ int main()
 // ****************************************************************************************************************************
 int EventHandle(int type, alias o, int x)
 {
+    // Axes
     if(x >= IN_POSITION_AXES & x < IN_POSITION_HAT)
     {
-        GetAxisData(&o, x);
-        if(!axdata.locked) GameOutput(&o, x, clip(AxisVal(o[x], &axdata), -AMAX, AMAX));
+        // Throttle - Slew control - 'I' layer
+        if (&o == &Throttle & (x == 256 | x == 257) & Joystick[S4]) {
+            // Mouse - do nothing
+        }
+        // Other axes
+        else {
+            GetAxisData(&o, x);
+            if(!axdata.locked) {
+                GameOutput(&o, x, clip(AxisVal(o[x], &axdata), -AMAX, AMAX));
+            }
+        }
     }
+    // Buttons & hats
     else if(!Joystick[S4] | !o[x]) GameOutput(&o, x, o[x]);
     DefaultMapping(&o, x);
 }
