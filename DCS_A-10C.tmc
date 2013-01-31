@@ -57,8 +57,8 @@ int main()
     // Trim Switch 
     MapKeyIO(&Joystick, H1U, PULSE+TrackIR_center);
     MapKeyIO(&Joystick, H1D, PULSE+TrackIR_pause);
-    MapKeyIO(&Joystick, H1R, PULSE+Trim_Reset);
-    
+    MapKeyIO(&Joystick, H1R, PULSE+TrackIR_precision);
+
     // Weapons Release Button
     MapKeyIO(&Joystick, S2, Pause);
                                 
