@@ -43,23 +43,23 @@ int _snap_hold(char temporary=0)
 {
     // Locked press-release as PULSE is not atomic:
     if(!SnapViewOn) {
-    
+
         // *** version CTRL + 0 / x / 0 ***
-    
-            // ActKey(LOCK);
-            // ActKey(KEYON+R_CTL+0     );
-            // ActKey(KEYON+      Num[0]); Sleep( kb_delay );
-            // ActKey(            Num[0]);
-            // ActKey(      R_CTL+0     );
-            // ActKey(LOCK);
-        
+
+            ActKey(LOCK);
+            ActKey(KEYON+R_CTL+0     ); Sleep(10);
+            ActKey(KEYON+      Num[0]); Sleep(kb_delay+10); //Sleep(kb_delay);
+            ActKey(            Num[0]);
+            ActKey(      R_CTL+0     );
+            ActKey(LOCK);
+
         // *** version WIN + x ***
-        
-            ActKey(KEYON+L_WIN+0);
-        
+
+            // ActKey(KEYON+L_WIN+0);
+
         SnapViewOn = 1;
     }
-    
+
     if (temporary) {
         SnapViewTemp = 1;
     }
@@ -69,21 +69,23 @@ int _snap_hold(char temporary=0)
 int _snap_release()
 {
     if(SnapViewOn) {
-    
+
         // *** version CTRL + 0 / x / 0 ***
-        
-            // ActKey(LOCK);
-            // ActKey(KEYON+Num[0]); Sleep(kb_delay);
-            // ActKey(      Num[0]);
-            // ActKey(LOCK);
-        
+
+            ActKey(LOCK);
+            ActKey(KEYON+Num[0]); Sleep(kb_delay);
+            ActKey(      Num[0]);
+            ActKey(LOCK);
+
+            // ActKey(KEYON+PULSE+Num[0]);
+
         // *** version WIN + x ***
-        
-            if (SnapViewCurrent!=-1) {
-                ActKey(Num[SnapViewCurrent]); // release current
-            }   
-            ActKey(L_WIN+0);
-        
+
+            // if (SnapViewCurrent!=-1) {
+                // ActKey(Num[SnapViewCurrent]); // release current
+            // }
+            // ActKey(L_WIN+0);
+
         SnapViewOn = 0;
         SnapViewTemp = 0;
         SnapViewCurrent = -1;
@@ -96,14 +98,19 @@ int _snap_set(char i)
 
     // *** version CTRL + 0 / x / 0 ***
 
-        // ActKey(KEYON+PULSE+Num[i]); 
-    
+        // ActKey(KEYON+PULSE+Num[i]);
+
+        ActKey(LOCK);
+        ActKey(KEYON+ Num[i]); Sleep( kb_delay );
+        ActKey(       Num[i]);
+        ActKey(LOCK);
+
     // *** version WIN + x ***
-    
-        if (SnapViewOn & SnapViewCurrent!=i & SnapViewCurrent!=-1) {
-            ActKey(Num[SnapViewCurrent]); // release current
-        }   
-        ActKey(KEYON+Num[i]); // release current
-    
+
+        // if (SnapViewOn & SnapViewCurrent!=i & SnapViewCurrent!=-1) {
+            // ActKey(Num[SnapViewCurrent]); // release current
+        // }
+        // ActKey(KEYON+Num[i]); // release current
+
     SnapViewCurrent = i;
 }

@@ -67,18 +67,26 @@ int main()
     
     
     // Countermeasures Management Switch
-    MapKeyIO(&Joystick, H4L, TEMPO(EXEC("toggleSnapView(4);"), EXEC("tempSnapView(4);"), 250));
-    MapKeyIO(&Joystick, H4P, TEMPO(EXEC("toggleSnapView(1);"), EXEC("tempSnapView(1);"), 250));
-    MapKeyIO(&Joystick, H4U, TEMPO(EXEC("toggleSnapView(2);"), EXEC("tempSnapView(2);"), 250));
-    MapKeyIO(&Joystick, H4D, TEMPO(EXEC("toggleSnapView(3);"), EXEC("tempSnapView(3);"), 250));
-    MapKeyIO(&Joystick, H4R, TEMPO(EXEC("toggleSnapView(6);"), EXEC("tempSnapView(6);"), 250));
+    MapKeyIO(&Joystick,  H4P, TEMPO(EXEC("toggleSnapView(9);"),
+                                    EXEC("tempSnapView(9);"), 300));
+    MapKeyRIO(&Joystick, H4P,       EXEC("releaseTempSnapView(9);"));
 
-    MapKeyRIO(&Joystick, H4L, EXEC("releaseTempSnapView(4);"));
-    MapKeyRIO(&Joystick, H4P, EXEC("releaseTempSnapView(1);"));
-    MapKeyRIO(&Joystick, H4U, EXEC("releaseTempSnapView(2);"));
-    MapKeyRIO(&Joystick, H4D, EXEC("releaseTempSnapView(3);"));
-    MapKeyRIO(&Joystick, H4R, EXEC("releaseTempSnapView(6);"));
-    
+    MapKeyIO(&Joystick,  H4U, TEMPO(EXEC("toggleSnapView(4);"),
+                                    EXEC("tempSnapView(4);"), 300));
+    MapKeyRIO(&Joystick, H4U,       EXEC("releaseTempSnapView(4);"));
+
+    MapKeyIO(&Joystick,  H4L, TEMPO(EXEC("toggleSnapView(1);"),
+                                    EXEC("tempSnapView(1);"), 300));
+    MapKeyRIO(&Joystick, H4L,       EXEC("releaseTempSnapView(1);"));
+
+    MapKeyIO(&Joystick,  H4R, TEMPO(EXEC("toggleSnapView(6);"),
+                                    EXEC("tempSnapView(6);"), 300));
+    MapKeyRIO(&Joystick, H4R,       EXEC("releaseTempSnapView(6);"));
+
+    MapKeyIO(&Joystick,  H4D, TEMPO(EXEC("toggleSnapView(3);"),
+                                    EXEC("tempSnapView(3);"), 300));
+    MapKeyRIO(&Joystick, H4D,       EXEC("releaseTempSnapView(3);"));
+
     // Throttle **************************************************************
     
     // Throttle Friction Control
