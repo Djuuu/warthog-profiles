@@ -40,15 +40,13 @@ int main()
     // Shift button ("I" layer)
     SetShiftButton(&Joystick, S4);
 
-    // Axes
-    SetSCurve(&Joystick, JOYX, 0, 0, 0, 2.5, 0);
-    SetSCurve(&Joystick, JOYY, 0, 0, 0, 2, 0);
-
-    MapAxis(&Throttle, THR_LEFT, DX_ZROT_AXIS, AXIS_REVERSED, MAP_ABSOLUTE);
-    MapAxis(&Throttle, THR_RIGHT, DX_Z_AXIS, AXIS_REVERSED, MAP_ABSOLUTE);
-
 
     // Joystick **************************************************************
+
+    // Axes
+    SetSCurve(&Joystick, JOYX, 0, 0, 0, 2.5, 0);
+    SetSCurve(&Joystick, JOYY, 0, 0, 0, 2.5, 0);
+
 
     //LED1 blinking when TG1 is pressed, stops blinking and sets LED1 to off when TG1 is released
     MapKey(&Joystick, TG1, CHAIN((Gun_trigger_stage1), REXEC(0, 150, "doLedToggle(1);")));
@@ -64,7 +62,6 @@ int main()
 
     // Master Mode Control Button
     MapKeyIO(&Joystick, S1, Trim_Reset);
-
 
     // Countermeasures Management Switch
     MapKeyIO(&Joystick,  H4P, TEMPO(EXEC("toggleSnapView(9);"),
@@ -87,7 +84,14 @@ int main()
                                     EXEC("tempSnapView(3);"), 300));
     MapKeyRIO(&Joystick, H4D,       EXEC("releaseTempSnapView(3);"));
 
+
     // Throttle **************************************************************
+
+    MapAxis(&Throttle, THR_LEFT, DX_ZROT_AXIS, AXIS_REVERSED, MAP_ABSOLUTE);
+    MapAxis(&Throttle, THR_RIGHT, DX_Z_AXIS, AXIS_REVERSED, MAP_ABSOLUTE);
+
+    SetJCurve(&Throttle, THR_RIGHT, 80, 96);
+    SetJCurve(&Throttle, THR_LEFT,  80, 96);
 
     // Mic Switch
     MapKeyIO(&Throttle, MSU, PULSE+VAC_arm, PULSE+VAC_arm); // VAC arm
@@ -116,11 +120,6 @@ int main()
         "MapAxis(&Throttle, SCY, MOUSE_Y_AXIS, AXIS_NORMAL, MAP_RELATIVE);"
         "SetSCurve(&Throttle, SCX, 0, 15, 0, 3, -5);"
         "SetSCurve(&Throttle, SCY, 0, 15, 0, 3, -5);"
-
-        //TEST : invert slew axes
-        // "MapAxis(&Throttle, SCX, DX_YROT_AXIS);"
-        // "MapAxis(&Throttle, SCY, DX_XROT_AXIS);"
-
     ));
     MapKeyR(&Joystick, S4, EXEC(
         // Unlock Friction Control on 'O' layer
@@ -133,16 +132,8 @@ int main()
         "SetSCurve(&Throttle, SCY, 0, 0, 0, 0, 0);"
     ));
 
-    // default
-    // MapAxis(&Throttle, SCX, DX_XROT_AXIS);
-    // MapAxis(&Throttle, SCY, DX_YROT_AXIS);
-    // SetSCurve(&Throttle, SCX, 0, 0, 0, 0, 0);
-    // SetSCurve(&Throttle, SCY, 0, 0, 0, 0, 0);
-
     MapKeyIO(&Throttle, SC, MOUSE_LEFT);
-    MapKeyIO(&Throttle, CSL, MOUSE_LEFT);
     MapKeyIO(&Throttle, CSD, MOUSE_LEFT);
-    MapKeyIO(&Throttle, CSR, MOUSE_RIGHT);
     MapKeyIO(&Throttle, CSU, MOUSE_RIGHT);
 
 }
