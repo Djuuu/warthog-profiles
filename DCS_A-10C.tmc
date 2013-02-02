@@ -63,6 +63,19 @@ int main()
     // Master Mode Control Button
     MapKeyIO(&Joystick, S1, Trim_Reset);
 
+    // Target Management Switch
+    MapKeyIO(&Joystick, H2U, F1_Cockpit_view);        // ^
+    MapKeyIO(&Joystick, H2D, F5_Ground_hostile_view); // v
+    MapKeyIO(&Joystick, H2R, F5_nearest_AC_view);     // >
+    MapKeyIO(&Joystick, H2L, F8_Target_view);         // <
+
+    // Data Management Switch
+    MapKeyIO(&Joystick, H3U, F1_Cockpit_view); // ^
+    MapKeyIO(&Joystick, H3D, F4_Chase_view);   // v
+    MapKeyIO(&Joystick, H3R, F6_Weapon_to_target_view); // >
+    MapKeyIO(&Joystick, H3L, F2_Aircraft_view); // <
+
+
     // Countermeasures Management Switch
     MapKeyIO(&Joystick,  H4P, TEMPO(EXEC("toggleSnapView(9);"),
                                     EXEC("tempSnapView(9);"), 300));

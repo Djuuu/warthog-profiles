@@ -51,3 +51,15 @@ define  SnapView7      L_WIN+KP7  //Snapview 7
 define  SnapView8      L_WIN+KP8  //Snapview 8
 define  SnapView9      L_WIN+KP9  //Snapview 9
 define  ResetSnapView  CTL+KP0    //Resetpanel
+
+// ----------------------------------
+//         Views: External
+// ----------------------------------
+
+define  F1_Cockpit_view           USB[0x3A]         //F1 Cockpit view
+define  F2_Aircraft_view          USB[0x3B]         //F2 Aircraft view
+define  F4_Chase_view             L_CTL+USB[0x3D]   //F4 Chase view
+define  F5_nearest_AC_view        USB[0x3E]         //F5 nearest AC view
+define  F5_Ground_hostile_view    L_CTL+USB[0x3E]   //F5 Ground hostile view
+define  F6_Weapon_to_target_view  L_CTL+USB[0x3F]   //F6 Weapon to target view
+define  F8_Target_view            USB[0x41]         //F8 Target view
