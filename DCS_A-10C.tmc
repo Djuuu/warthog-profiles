@@ -89,6 +89,9 @@ int main()
 
     // Throttle **************************************************************
 
+    // Mic Switch
+    MapKeyIO(&Throttle, MSU, PULSE+VAC_arm, PULSE+VAC_arm); // VAC arm
+
     // Throttle Friction Control
     // Landing gear on 'I' layer
     // LED3 blinking when gear is down

@@ -7,6 +7,7 @@
 define  Showcontrolsindicator  R_CTL+ENT  //Show Controls Indicator
 
 
+define  VAC_arm L_CTL+USB[0x12]        // VAC arm (R_CTRL + 'o')
 
 // ---------------------------
 //           HOTAS
