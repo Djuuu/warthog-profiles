@@ -51,13 +51,15 @@ int BlinkToState(int i, int state, int duration=2000, int step=250)
 {
     int time = 0;
     int led_cmd;
-    if (state<1) { led_cmd = -LedArray[i];}
-    else         { led_cmd = LedArray[i];}
-    
+    if (state<1) { led_cmd = LedOff(i);}
+    else         { led_cmd = LedOn(i);}
+
     ActKey(KEYON+PULSE+led_cmd);
+
     while (time<duration) {
         time = time + step;
         DeferCall(time, &ActKey, KEYON+PULSE+LedToggle(i));
     }
-    ActKey(KEYON+PULSE+led_cmd);
+
+    DeferCall(time+step, &ActKey, KEYON+PULSE+led_cmd);
 }

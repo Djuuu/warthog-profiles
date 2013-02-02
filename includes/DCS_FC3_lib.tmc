@@ -2,6 +2,8 @@
 include "includes/DCS_FC3_Common_Macros.ttm"
 include "includes/TrackIR_Macros.ttm"
 
+include "includes/Warthog_leds.tmc"
+
 // Useful constants and arrays **************************************************************
 
 define Engine_Left  0
@@ -163,43 +165,6 @@ int setAfterburner(int engine, int on)
     }
 
     updateBacklight();
-}
-
-// Turns LED i on (command)
-int LedOn(int i)
-{
-    return LED(&Throttle, LED_ONOFF, LED_CURRENT+LedArray[i]);
-}
-// Turns LED i off (command)
-int LedOff(int i)
-{
-    return LED(&Throttle, LED_ONOFF, LED_CURRENT-LedArray[i]);
-}
-// Turns LED i on with blinking transition (function)
-int BlinkToOn(int i, int duration=2500)
-{
-    int step = 250;
-    int time = 0;
-    ActKey(KEYON+PULSE+LedOn(i));
-    while (time<duration) {
-        time = time + step;
-        DeferCall(time, &ActKey, KEYON+PULSE+LedOff(i));
-        time = time + step;
-        DeferCall(time, &ActKey, KEYON+PULSE+LedOn(i));
-    }
-}
-// Turns LED i on with blinking transition (function)
-int BlinkToOff(int i, int duration=2000)
-{
-    int step = 250;
-    int time = 0;
-    ActKey(KEYON+PULSE+LedOff(i));
-    while (time<duration) {
-        time = time + step;
-        DeferCall(time, &ActKey, KEYON+PULSE+LedOn(i));
-        time = time + step;
-        DeferCall(time, &ActKey, KEYON+PULSE+LedOff(i));
-    }
 }
 
 // Engine power indication
