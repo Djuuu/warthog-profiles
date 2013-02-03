@@ -16,20 +16,17 @@ int main()
 
     // Init **************************************************************
 
-    Exclude(&HCougar);
     Exclude(&Joystick);
     Exclude(&Throttle);
-    Exclude(&LMFD);
-    Exclude(&RMFD);
 
     // MODE_FILTERED lets the controlleres physically plugged in while launching the script
     // Allows DCS A-10C to use its native mapping
     Configure(&Joystick, MODE_FILTERED);
     Configure(&Throttle, MODE_FILTERED);
-    //Configure(&LMFD, MODE_FILTERED);
-    //Configure(&RMFD, MODE_FILTERED);
 
     if(Init(&EventHandle)) return 1;
+
+    initCustomCommands();
 
     // TrackIR launch
     system("spawn -w C:\\_Programmes_\\Peripheriques\\TrackIR5\\TrackIR5.exe");
@@ -47,10 +44,6 @@ int main()
     SetSCurve(&Joystick, JOYX, 0, 0, 0, 2.5, 0);
     SetSCurve(&Joystick, JOYY, 0, 0, 0, 2.5, 0);
 
-
-    //LED1 blinking when TG1 is pressed, stops blinking and sets LED1 to off when TG1 is released
-    MapKey(&Joystick, TG1, CHAIN((Gun_trigger_stage1), REXEC(0, 150, "doLedToggle(1);")));
-    MapKeyR(&Joystick, TG1, EXEC("doLedOff(1);"));
 
     // Trim Switch
     MapKeyIO(&Joystick, H1U, PULSE+TrackIR_center);
@@ -70,10 +63,10 @@ int main()
     MapKeyIO(&Joystick, H2L, F8_Target_view);         // <
 
     // Data Management Switch
-    MapKeyIO(&Joystick, H3U, F1_Cockpit_view); // ^
-    MapKeyIO(&Joystick, H3D, F4_Chase_view);   // v
+    MapKeyIO(&Joystick, H3U, F1_Cockpit_view);          // ^
+    MapKeyIO(&Joystick, H3D, F4_Chase_view);            // v
     MapKeyIO(&Joystick, H3R, F6_Weapon_to_target_view); // >
-    MapKeyIO(&Joystick, H3L, F2_Aircraft_view); // <
+    MapKeyIO(&Joystick, H3L, F2_Aircraft_view);         // <
 
 
     // Countermeasures Management Switch
@@ -100,27 +93,21 @@ int main()
 
     // Throttle **************************************************************
 
+    // Axes
     MapAxis(&Throttle, THR_LEFT, DX_ZROT_AXIS, AXIS_REVERSED, MAP_ABSOLUTE);
     MapAxis(&Throttle, THR_RIGHT, DX_Z_AXIS, AXIS_REVERSED, MAP_ABSOLUTE);
 
     SetJCurve(&Throttle, THR_RIGHT, 80, 96);
     SetJCurve(&Throttle, THR_LEFT,  80, 96);
 
-    // Mic Switch
-    MapKeyIO(&Throttle, MSU, PULSE+VAC_arm, PULSE+VAC_arm); // VAC arm
-
     // Throttle Friction Control
     // Landing gear on 'I' layer
     // LED3 blinking when gear is down
     KeyAxis(&Throttle, THR_FC, 'i', AXMAP2(
-        LIST(0,40,60,100),
-        CHAIN(
-            (PULSE+LandingGear_up),
-            EXEC("ActKey(PULSE+KEYON+LED(&Throttle, LED_ONOFF, LED_CURRENT-LED3));")),
+        LIST(0,30,70,100),
+        LandingGearUpCustom,
         0,
-        CHAIN(
-            (PULSE+LandingGear_down),
-            REXEC(0, 500, "ActKey(KEYON+LED(&Throttle, LED_ONOFF, LED_CURRENT^LED3));"))
+        LandingGearDownCustom
     ));
 
     // Axis / layers
@@ -145,9 +132,29 @@ int main()
         "SetSCurve(&Throttle, SCY, 0, 0, 0, 0, 0);"
     ));
 
+    // Mouse control (Slew control press / Coolie Hat)
     MapKeyIO(&Throttle, SC, MOUSE_LEFT);
     MapKeyIO(&Throttle, CSD, MOUSE_LEFT);
     MapKeyIO(&Throttle, CSU, MOUSE_RIGHT);
+
+    // Mic Switch
+    MapKeyIO(&Throttle, MSU, PULSE+VAC_arm, PULSE+VAC_arm); // VAC arm
+
+    // Speedbrake
+    MapKey(&Throttle, SPDF, AirbrakeOffCustom);
+    MapKeyIO(&Throttle, SPDB, PULSE+Canopy_Open_Close,
+                              AirbrakeOnCustom);
+
+    // Flaps
+    MapKey(&Throttle, FLAPU, FlapsUpCustom);
+    MapKey(&Throttle, FLAPM, FlapsDownCustom);
+    MapKey(&Throttle, FLAPD, FlapsLandingCustom);
+
+    // Idle
+    MapKey(&Throttle,  IDLELON, EXEC("setEngine(Left,  Stop);"));
+    MapKeyR(&Throttle, IDLELON, EXEC("setEngine(Left,  Start);"));
+    MapKey(&Throttle,  IDLERON, EXEC("setEngine(Right, Stop);"));
+    MapKeyR(&Throttle, IDLERON, EXEC("setEngine(Right, Start);"));
 
 }
 
@@ -155,14 +162,19 @@ int main()
 // ****************************************************************************************************************************
 // Eventhndler
 // ****************************************************************************************************************************
+
 int EventHandle(int type, alias o, int x)
 {
+    int isShiftedCommand     = Joystick[S4];
+    int isAxisCommand        = x >= IN_POSITION_AXES & x < IN_POSITION_HAT;
+    int isSlewControlCommand = &o == &Throttle & (x == 256 | x == 257);
+
     // Axes
-    if(x >= IN_POSITION_AXES & x < IN_POSITION_HAT)
+    if(isAxisCommand)
     {
-        // Throttle - Slew control - 'I' layer
-        if (&o == &Throttle & (x == 256 | x == 257) & Joystick[S4]) {
-            // Mouse - do nothing
+        // Slew control as mouse
+        if (isShiftedCommand & isSlewControlCommand) {
+            //do nothing
         }
         // Other axes
         else {
@@ -174,5 +186,6 @@ int EventHandle(int type, alias o, int x)
     }
     // Buttons & hats
     else if(!Joystick[S4] | !o[x]) GameOutput(&o, x, o[x]);
+
     DefaultMapping(&o, x);
 }

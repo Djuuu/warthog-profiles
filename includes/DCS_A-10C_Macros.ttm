@@ -33,8 +33,10 @@ define    Pause     USB[0x48]      //Pause
 //          Systems
 // ---------------------------
 
-define  LandingGear_up      L_CTL+USB[0x0a]  //Landing Gear up
-define  LandingGear_down  L_SHIFT+USB[0x0a]  //Landing Gear down
+define  Landing_Gear_Up      L_CTL+USB[0x0a]  //Landing Gear up
+define  Landing_Gear_Down  L_SHIFT+USB[0x0a]  //Landing Gear down
+
+define  Canopy_Open_Close   L_CTL+USB[0x06]   //Canopy Open/Close
 
 // ----------------------------------
 //         Views: Cockpit
